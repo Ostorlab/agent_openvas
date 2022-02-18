@@ -1,6 +1,8 @@
 """Wrapper for OpenVas scanner to start the scan and extract the results."""
 import datetime
 import logging
+import base64
+import csv, json
 
 import gvm
 from gvm.protocols import gmp as openvas_gmp
@@ -76,3 +78,56 @@ class OpenVas:
         """
         response = gmp.start_task(task_id)
         return response[0].text
+
+    def get_results(self):
+        connection = gvm.connections.TLSConnection(hostname='localhost')
+        transform = transforms.EtreeTransform()
+        with openvas_gmp.Gmp(connection, transform=transform) as gmp:
+            gmp.authenticate(GMP_USERNAME, GMP_PASSWORD)
+            # Get the CSV report type
+            report_format_id = ""
+            report_format = gmp.get_report_formats()
+            for report in report_format:
+                report.tag == "report_format"
+                for format in report:
+                    if format.text == 'CSV result list.':
+                        report_format_id = report.attrib.get('id')
+
+            result_reports = []
+            all_reports = gmp.get_reports()
+            for report in all_reports:
+                if report.tag == 'report':
+                    for one_report in report:
+                        if one_report.tag == 'report':
+                            result_reports.append(report.attrib.get('id'))
+
+            # Get out the reports and get them as csv files to use
+            for report_id in result_reports:
+                reportscv = gmp.get_report(report_id, report_format_id=report_format_id,
+                                           filter="apply_overrides=0 min_qod=70",
+                                           ignore_pagination=True, details=True)
+                # pretty_print(reportscv)
+                result_id = reportscv.get_reports_response.report['id']
+                base64CVSData = reportscv.get_reports_response.report.cdata
+                data = str(base64.b64decode(base64CVSData), "utf-8")
+                # print(data)
+                # Write the result to file
+                self._writeResultToFile(result_id, data)
+
+    def _writeResultToFile(self, name, data):
+        '''
+        This will write the data into a file
+        '''
+        csvFilePath = "report.csv"
+        jsonFilePath = "report.json"
+        f = open(csvFilePath, "w")
+        f.write(data)
+        f.close()
+        # read the csv and add the data to a dictionary
+        jsonFile = open(jsonFilePath, "w")
+        with open(csvFilePath) as csvFile:
+            csvReader = csv.DictReader(csvFile)
+            for csvRow in csvReader:
+                jsonFile.write(json.dumps(csvRow) + "\n")
+        jsonFile.close()
+        csvFile.close()
