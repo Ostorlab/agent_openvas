@@ -1,8 +1,11 @@
 import datetime
+import logging
 
 import gvm
 from gvm.protocols import gmp as openvas_gmp
 from gvm import transforms
+
+logger = logging.getLogger(__name__)
 
 ALL_IANA_ASSIGNED_TCP_UDP = '4a4717fe-57d2-11e1-9a26-406186ea4fc5'
 GVMD_FULL_FAST_CONFIG = 'daba56c8-73ec-11df-a475-002264764cea'
@@ -20,22 +23,12 @@ class OpenVas:
         with openvas_gmp.Gmp(connection, transform=transform) as gmp:
             gmp.authenticate(GMP_USERNAME, GMP_PASSWORD)
             target_id = self._create_target(gmp, ip, ALL_IANA_ASSIGNED_TCP_UDP)
-            task_id = self._create_task(
-                gmp,
-                ip,
-                target_id,
-                GVMD_FULL_FAST_CONFIG,
-                OPENVAS_SCANNER_ID,
-            )
+            task_id = self._create_task(gmp, ip, target_id, GVMD_FULL_FAST_CONFIG, OPENVAS_SCANNER_ID,)
             report_id = self._start_task(gmp, task_id)
-            print(
-                "Started scan of host {}. Corresponding report ID is {}".format(
-                    ip, report_id
-                )
-            )
+            logger.info('Started scan of host %s. Corresponding report ID is %s', str(ip), str(report_id))
 
     def _create_target(self, gmp, ip_address, port_list_id):
-        name = "Testing Host {} {}".format(ip_address, str(datetime.datetime.now()))
+        name = f'Testing Host {ip_address} {datetime.datetime.now()}'
         response = gmp.create_target(name=name, hosts=[ip_address], port_list_id=port_list_id)
         return response.get('id')
 
@@ -44,6 +37,6 @@ class OpenVas:
         return response[0].text
 
     def _create_task(self, gmp, ip_address, target_id, scan_config_id, scanner_id):
-        name = "Scan Host {}".format(ip_address)
+        name = f'Scan Host {ip_address}'
         response = gmp.create_task(name=name, config_id=scan_config_id, target_id=target_id, scanner_id=scanner_id,)
         return response.get('id')
