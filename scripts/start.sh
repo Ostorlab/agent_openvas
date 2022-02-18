@@ -280,15 +280,5 @@ if [ $SSHD == "true" ]; then
 	/usr/sbin/sshd -f /sshd_config -E /usr/local/var/log/gvm/sshd.log
 fi
 
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-echo "+ Your GVM 11 container is now ready to use! +"
-echo "++++++++++++++++++++++++++++++++++++++++++++++"
-echo ""
-echo "-----------------------------------------------------------"
-echo "Server Public key: $(cat /etc/ssh/ssh_host_ed25519_key.pub)"
-echo "-----------------------------------------------------------"
-echo ""
-echo "++++++++++++++++"
-echo "+ Tailing logs +"
-echo "++++++++++++++++"
-tail -F /usr/local/var/log/gvm/*
+echo "READY"
+

@@ -1,5 +1,7 @@
 """Sample agent implementation"""
 import logging
+import subprocess
+
 from rich import logging as rich_logging
 
 from ostorlab.agent import agent
@@ -13,13 +15,16 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 logger.setLevel('DEBUG')
 
+START_SCRIPT = '/app/agent/scripts/start.sh'
 
-class HellWorldAgent(agent.Agent):
-    """Hello world agent."""
+
+class OpenVasAgent(agent.Agent):
+    """OpenVas Agent."""
 
     def start(self) -> None:
-        """TODO (author): add your description here."""
-        logger.info('running start')
+        """Calls that start.sh script to bootstrap the scanner."""
+        logger.info('starting openvas daemons')
+        subprocess.run(START_SCRIPT)
 
     def process(self, message: m.Message) -> None:
         """TODO (author): add your description here.
@@ -38,4 +43,4 @@ class HellWorldAgent(agent.Agent):
 
 if __name__ == '__main__':
     logger.info('starting agent ...')
-    HellWorldAgent.main()
+    OpenVasAgent.main()
