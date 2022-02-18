@@ -1,2 +1,4 @@
 ostorlab
 rich
+python-gvm
+gvm-tools
