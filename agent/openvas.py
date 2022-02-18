@@ -1,13 +1,12 @@
 """Wrapper for OpenVas scanner to start the scan and extract the results."""
+import base64
 import datetime
 import logging
-import base64
-import csv, json
 import time
 
 import gvm
-from gvm.protocols import gmp as openvas_gmp
 from gvm import transforms
+from gvm.protocols import gmp as openvas_gmp
 
 logger = logging.getLogger(__name__)
 
@@ -16,22 +15,31 @@ GVMD_FULL_FAST_CONFIG = 'daba56c8-73ec-11df-a475-002264764cea'
 OPENVAS_SCANNER_ID = '08b69003-5fc2-4037-a479-93b440211c73'
 GMP_USERNAME = 'admin'
 GMP_PASSWORD = 'admin'
+GMP_HOST = 'localhost'
 WAIT_TIME = 30
+
 
 class OpenVas:
     """OpenVas wrapper to enable using openvas scanner from ostorlab agent class."""
+
+    def __init__(self, host: str = GMP_HOST, username: str = GMP_USERNAME, password: str = GMP_PASSWORD) -> None:
+        super().__init__()
+        self._host = host
+        self._username = username
+        self._password = password
+
     def start_scan(self, ip):
         """Start OpenVas scan on the ip provided.
 
         Args:
             ip: Target ip to scan.
         """
-        connection = gvm.connections.TLSConnection(hostname='localhost')
+        connection = gvm.connections.TLSConnection(hostname=self._host)
         transform = transforms.EtreeTransform()
         with openvas_gmp.Gmp(connection, transform=transform) as gmp:
             gmp.authenticate(GMP_USERNAME, GMP_PASSWORD)
             target_id = self._create_target(gmp, ip, ALL_IANA_ASSIGNED_TCP_UDP)
-            task_id = self._create_task(gmp, ip, target_id, GVMD_FULL_FAST_CONFIG, OPENVAS_SCANNER_ID,)
+            task_id = self._create_task(gmp, ip, target_id, GVMD_FULL_FAST_CONFIG, OPENVAS_SCANNER_ID, )
             report_id = self._start_task(gmp, task_id)
             logger.info('Started scan of host %s. Corresponding report ID is %s', str(ip), str(report_id))
 
@@ -64,7 +72,7 @@ class OpenVas:
             - task id.
         """
         name = f'Scan Host {ip}'
-        response = gmp.create_task(name=name, config_id=scan_config_id, target_id=target_id, scanner_id=scanner_id,)
+        response = gmp.create_task(name=name, config_id=scan_config_id, target_id=target_id, scanner_id=scanner_id, )
         return response.get('id')
 
     def _start_task(self, gmp, task_id):
@@ -80,17 +88,17 @@ class OpenVas:
         response = gmp.start_task(task_id)
         return response[0].text
 
-    def wait_task(self, task_id):
+    def wait_scan(self, scan_id: str) -> None:
         connection = gvm.connections.TLSConnection(hostname='localhost')
         transform = transforms.EtreeTransform()
         with openvas_gmp.Gmp(connection, transform=transform) as gmp:
             gmp.authenticate(GMP_USERNAME, GMP_PASSWORD)
-            response = gmp.get_tasks(task_id=task_id)
+            response = gmp.get_tasks(task_id=scan_id)
             while response.task.status != 'DONE':
                 time.sleep(WAIT_TIME)
                 logger.info('Scan progress %s', str(response.task.progress))
 
-    def get_results(self):
+    def get_results(self, scan_id: str):
         connection = gvm.connections.TLSConnection(hostname='localhost')
         transform = transforms.EtreeTransform()
         with openvas_gmp.Gmp(connection, transform=transform) as gmp:
@@ -99,7 +107,6 @@ class OpenVas:
             report_format_id = ""
             report_format = gmp.get_report_formats()
             for report in report_format:
-                report.tag == "report_format"
                 for format in report:
                     if format.text == 'CSV result list.':
                         report_format_id = report.attrib.get('id')
@@ -121,24 +128,5 @@ class OpenVas:
                 result_id = reportscv.get_reports_response.report['id']
                 base64CVSData = reportscv.get_reports_response.report.cdata
                 data = str(base64.b64decode(base64CVSData), "utf-8")
-                # print(data)
-                # Write the result to file
-                self._writeResultToFile(result_id, data)
-
-    def _writeResultToFile(self, name, data):
-        '''
-        This will write the data into a file
-        '''
-        csvFilePath = "report.csv"
-        jsonFilePath = "report.json"
-        f = open(csvFilePath, "w")
-        f.write(data)
-        f.close()
-        # read the csv and add the data to a dictionary
-        jsonFile = open(jsonFilePath, "w")
-        with open(csvFilePath) as csvFile:
-            csvReader = csv.DictReader(csvFile)
-            for csvRow in csvReader:
-                jsonFile.write(json.dumps(csvRow) + "\n")
-        jsonFile.close()
-        csvFile.close()
+                print(data)
+                return data
