@@ -3,6 +3,7 @@ import datetime
 import logging
 import base64
 import csv, json
+import time
 
 import gvm
 from gvm.protocols import gmp as openvas_gmp
@@ -15,7 +16,7 @@ GVMD_FULL_FAST_CONFIG = 'daba56c8-73ec-11df-a475-002264764cea'
 OPENVAS_SCANNER_ID = '08b69003-5fc2-4037-a479-93b440211c73'
 GMP_USERNAME = 'admin'
 GMP_PASSWORD = 'admin'
-
+WAIT_TIME = 30
 
 class OpenVas:
     """OpenVas wrapper to enable using openvas scanner from ostorlab agent class."""
@@ -78,6 +79,16 @@ class OpenVas:
         """
         response = gmp.start_task(task_id)
         return response[0].text
+
+    def wait_task(self, task_id):
+        connection = gvm.connections.TLSConnection(hostname='localhost')
+        transform = transforms.EtreeTransform()
+        with openvas_gmp.Gmp(connection, transform=transform) as gmp:
+            gmp.authenticate(GMP_USERNAME, GMP_PASSWORD)
+            response = gmp.get_tasks(task_id=task_id)
+            while response.task.status != 'DONE':
+                time.sleep(WAIT_TIME)
+                logger.info('Scan progress %s', str(response.task.progress))
 
     def get_results(self):
         connection = gvm.connections.TLSConnection(hostname='localhost')
