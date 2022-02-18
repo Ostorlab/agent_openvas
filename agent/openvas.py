@@ -58,7 +58,7 @@ class OpenVas:
         Returns:
             - target id.
         """
-        name = f'Scan Host {ip_address}'
+        name = f'Scan Host {ip}'
         response = gmp.create_task(name=name, config_id=scan_config_id, target_id=target_id, scanner_id=scanner_id,)
         return response.get('id')
 
