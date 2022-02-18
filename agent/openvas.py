@@ -53,15 +53,26 @@ class OpenVas:
         Args:
             gmp: GMP object.
             ip: Target ip to scan.
-            port_list_id: ports to scan
+            target_id: hosts scanned by the task.
+            scan_config_id: scan configuration used by the task
+            scanner_id: scanner to use for scanning the target.
 
         Returns:
-            - target id.
+            - task id.
         """
         name = f'Scan Host {ip}'
         response = gmp.create_task(name=name, config_id=scan_config_id, target_id=target_id, scanner_id=scanner_id,)
         return response.get('id')
 
     def _start_task(self, gmp, task_id):
+        """Create gmp task https://docs.greenbone.net/API/GMP/gmp-21.04.html#command_start_task.
+
+        Args:
+            gmp: GMP object.
+            task_id: task id.
+
+        Returns:
+            - task result.
+        """
         response = gmp.start_task(task_id)
         return response[0].text
