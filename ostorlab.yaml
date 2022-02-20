@@ -1,5 +1,5 @@
 kind: Agent
-name: tsunami
+name: openvas
 version: 0.0.1
 description: "OpenVas is an open-source security scanner part of the Greenbone Vulnerability Security Suite."
 in_selectors:
