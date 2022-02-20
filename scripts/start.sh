@@ -50,7 +50,7 @@ fi
 chown postgres:postgres -R /data/database
 
 echo "Starting PostgreSQL..."
-su -c "/usr/lib/postgresqopenvas_libl/12/bin/pg_ctl -D /data/database start" postgres
+su -c "/usr/lib/postgresql/12/bin/pg_ctl -D /data/database start" postgres
 
 if  [ ! -d /data/ssh ]; then
 	echo "Creating SSH folder..."

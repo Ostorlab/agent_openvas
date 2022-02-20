@@ -7,6 +7,8 @@ from rich import logging as rich_logging
 from ostorlab.agent import agent
 from ostorlab.agent import message as m
 
+from agent import openvas
+
 logging.basicConfig(
     format='%(message)s',
     datefmt='[%X]',
@@ -27,18 +29,11 @@ class OpenVasAgent(agent.Agent):
         subprocess.run(START_SCRIPT)
 
     def process(self, message: m.Message) -> None:
-        """TODO (author): add your description here.
-
-        Args:
-            message:
-
-        Returns:
-
-        """
-        # TODO (author): implement agent logic here.
-        del message
         logger.info('processing message')
-        self.emit('v3.healthcheck.ping', {'body': 'Hello World!'})
+        openVas = openvas.OpenVas()
+        openVas.start_scan(message.data.get('host'))
+        openVas.OpenVas.wait_task()
+        openVas.OpenVas.get_results()
 
 
 if __name__ == '__main__':

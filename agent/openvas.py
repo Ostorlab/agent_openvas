@@ -85,21 +85,24 @@ class OpenVas:
         transform = transforms.EtreeTransform()
         with openvas_gmp.Gmp(connection, transform=transform) as gmp:
             gmp.authenticate(GMP_USERNAME, GMP_PASSWORD)
-            response = gmp.get_tasks(task_id=task_id)
-            while response.task.status != 'DONE':
+            while True:
+                resp_tasks = gmp.get_tasks().xpath('task')
+                for task in resp_tasks:
+                    if task.xpath('@id')[0] == task_id:
+                        if task.find('status').text == 'Done':
+                            return True
+                        else:
+                            logger.info('Scan progress %s', str(task.find('status').text))
                 time.sleep(WAIT_TIME)
-                logger.info('Scan progress %s', str(response.task.progress))
 
     def get_results(self):
         connection = gvm.connections.TLSConnection(hostname='localhost')
         transform = transforms.EtreeTransform()
         with openvas_gmp.Gmp(connection, transform=transform) as gmp:
             gmp.authenticate(GMP_USERNAME, GMP_PASSWORD)
-            # Get the CSV report type
             report_format_id = ""
             report_format = gmp.get_report_formats()
             for report in report_format:
-                report.tag == "report_format"
                 for format in report:
                     if format.text == 'CSV result list.':
                         report_format_id = report.attrib.get('id')
@@ -114,31 +117,10 @@ class OpenVas:
 
             # Get out the reports and get them as csv files to use
             for report_id in result_reports:
-                reportscv = gmp.get_report(report_id, report_format_id=report_format_id,
+                response = gmp.get_report(report_id, report_format_id=report_format_id,
                                            filter="apply_overrides=0 min_qod=70",
                                            ignore_pagination=True, details=True)
-                # pretty_print(reportscv)
-                result_id = reportscv.get_reports_response.report['id']
-                base64CVSData = reportscv.get_reports_response.report.cdata
-                data = str(base64.b64decode(base64CVSData), "utf-8")
-                # print(data)
-                # Write the result to file
-                self._writeResultToFile(result_id, data)
-
-    def _writeResultToFile(self, name, data):
-        '''
-        This will write the data into a file
-        '''
-        csvFilePath = "report.csv"
-        jsonFilePath = "report.json"
-        f = open(csvFilePath, "w")
-        f.write(data)
-        f.close()
-        # read the csv and add the data to a dictionary
-        jsonFile = open(jsonFilePath, "w")
-        with open(csvFilePath) as csvFile:
-            csvReader = csv.DictReader(csvFile)
-            for csvRow in csvReader:
-                jsonFile.write(json.dumps(csvRow) + "\n")
-        jsonFile.close()
-        csvFile.close()
+                report_element = response.find("report")
+                content = report_element.find("report_format").tail
+                data = str(base64.b64decode(content), "utf-8")
+                return data
