@@ -21,7 +21,7 @@ This repository is an implementation of the OpenVas agent.
 ## Getting Started
 To perform your first scan, simply run the following command.
 ```shell
-ostorlab scan run --install --agents agent/ostorlab/openvas ip 8.8.8.8
+ostorlab scan run --install --agent agent/ostorlab/openvas ip 8.8.8.8
 ```
 
 This command will download and install `agent/ostorlab/openvas` and target the ip `8.8.8.8`.
@@ -40,7 +40,7 @@ Agent OpenVas can be installed directly from the ostorlab agent store or built f
 
 You can then run the agent with the following command:
 ```shell
-ostorlab scan run --agents agent/ostorlab/openvas ip 8.8.8.8
+ostorlab scan run --agent agent/ostorlab/openvas ip 8.8.8.8
 ```
 
 
@@ -68,11 +68,11 @@ git clone https://github.com/Ostorlab/agent_openvas.git && cd agent_openvas
  4. Run the agent using one of the following commands:
 	 * If you did not specify an organization when building the image:
       ```shell
-      ostorlab scan run --agents agent//openvas ip 8.8.8.8
+      ostorlab scan run --agent agent//openvas ip 8.8.8.8
       ```
 	 * If you specified an organization when building the image:
       ```shell
-      ostorlab scan run --agents agent/[ORGANIZATION]/openvas ip 8.8.8.8
+      ostorlab scan run --agent agent/[ORGANIZATION]/openvas ip 8.8.8.8
       ```
 
 
