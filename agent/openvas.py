@@ -20,11 +20,13 @@ WAIT_TIME = 30
 
 class OpenVas:
     """OpenVas wrapper to enable using openvas scanner from ostorlab agent class."""
-    def start_scan(self, ip):
+    def start_scan(self, ip: str) -> str:
         """Start OpenVas scan on the ip provided.
 
         Args:
             ip: Target ip to scan.
+        Returns:
+            task_id: str
         """
         connection = gvm.connections.TLSConnection(hostname='localhost')
         transform = transforms.EtreeTransform()
@@ -39,7 +41,7 @@ class OpenVas:
             logger.info('Started scan of host %s. Corresponding report ID is %s', str(ip), str(report_id))
             return task_id
 
-    def _create_target(self, gmp, ip, port_list_id):
+    def _create_target(self, gmp: openvas_gmp.Gmp, ip: str, port_list_id: str) -> str:
         """Create gmp target https://docs.greenbone.net/API/GMP/gmp-21.04.html#command_create_target.
 
         Args:
@@ -54,7 +56,7 @@ class OpenVas:
         response = gmp.create_target(name=name, hosts=[ip], port_list_id=port_list_id)
         return response.get('id')
 
-    def _create_task(self, gmp, ip, target_id, scan_config_id, scanner_id):
+    def _create_task(self, gmp: openvas_gmp.Gmp, ip: str, target_id: str, scan_config_id: str, scanner_id: str) -> str:
         """Create gmp task https://docs.greenbone.net/API/GMP/gmp-21.04.html#command_create_task.
 
         Args:
@@ -71,7 +73,7 @@ class OpenVas:
         response = gmp.create_task(name=name, config_id=scan_config_id, target_id=target_id, scanner_id=scanner_id,)
         return response.get('id')
 
-    def _start_task(self, gmp, task_id):
+    def _start_task(self, gmp: openvas_gmp.Gmp, task_id: str) -> str:
         """Create gmp task https://docs.greenbone.net/API/GMP/gmp-21.04.html#command_start_task.
 
         Args:
@@ -84,7 +86,7 @@ class OpenVas:
         response = gmp.start_task(task_id)
         return response[0].text
 
-    def wait_task(self, task_id):
+    def wait_task(self, task_id: str) -> bool:
         logger.info('Waiting for task %s', task_id)
         connection = gvm.connections.TLSConnection(hostname='localhost')
         transform = transforms.EtreeTransform()
@@ -103,7 +105,7 @@ class OpenVas:
                     logger.error('Socket timeout error')
                 time.sleep(WAIT_TIME)
 
-    def get_results(self):
+    def get_results(self) -> str:
         connection = gvm.connections.TLSConnection(hostname='localhost')
         transform = transforms.EtreeTransform()
         with openvas_gmp.Gmp(connection, transform=transform) as gmp:

@@ -133,9 +133,5 @@ RUN mkdir -p /app/agent
 ENV PYTHONPATH=/app
 COPY agent /app/agent
 COPY ostorlab.yaml /app/agent/ostorlab.yaml
-RUN mkdir -p /app/ostorlab
-COPY ostorlab_client /app/ostorlab
-WORKDIR /app/ostorlab
-RUN  python3 -m pip install .
 WORKDIR /app
 CMD ["python3", "/app/agent/openvas_agent.py"]
