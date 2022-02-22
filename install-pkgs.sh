@@ -11,8 +11,7 @@ apt-get update
 
 export TERM=xterm
 
-apt install -y \
-apt-utils \
+for i in apt-utils \
 bison \
 build-essential \
 ca-certificates \
@@ -62,9 +61,6 @@ uuid-dev \
 wapiti \
 whiptail \
 xml-twig-tools \
-xsltproc
-
-apt install -y \
 python3-defusedxml \
 python3-dialog \
 python3-lxml \
@@ -73,7 +69,7 @@ python3-pip \
 python3-polib \
 python3-psutil \
 python3-setuptools \
-
+xsltproc; do apt install -y $i; done
 
 # Install Node.js
 curl -sL https://deb.nodesource.com/setup_10.x | bash -
