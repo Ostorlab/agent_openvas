@@ -31,7 +31,7 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
     """OpenVas Agent."""
 
     def start(self) -> None:
-        """Calls that start.sh script to bootstrap the scanner."""
+        """Calls the start.sh script to bootstrap the scanner."""
         logger.info('starting openvas daemons')
         subprocess.run(START_SCRIPT, check=True)
         self._wait_vt_ready()
@@ -47,6 +47,9 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
         logger.info('Scan finished.')
 
     def _wait_vt_ready(self):
+        """when started, Openvas first loads all the VT to the database
+        We need to wait until the load is done before processing the message
+        """
         while True:
             with open(LOG_FILE, 'rb') as f:
                 for line in f.readlines():
@@ -55,14 +58,19 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
             logger.info('Waiting for VT to load in database.')
             time.sleep(WAIT_VT_LOAD)
 
-    def _persist_results(self, results):
-        f = open(CSV_PATH_OUTPUT, "w")
-        f.write(results)
-        f.close()
+    def _persist_results(self, results: str):
+        """Persist the csv result file
+        Args:
+            results: file content
+        """
+        with open(CSV_PATH_OUTPUT, 'w', encoding='UTF-8') as f:
+            f.write(results)
 
     def _process_results(self):
-        with open(CSV_PATH_OUTPUT) as csvFile:
-            line_results = csv.DictReader(csvFile)
+        """read and parse the output file and send the findings"""
+
+        with open(CSV_PATH_OUTPUT, encoding='UTF-8') as csv_file:
+            line_results = csv.DictReader(csv_file)
             for line_result in line_results:
                 self.report_vulnerability(
                     entry=kb.Entry(

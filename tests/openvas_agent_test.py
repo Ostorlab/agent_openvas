@@ -1,4 +1,4 @@
-"""Unittests for nuclei class."""
+"""Unittests for OpenVas class."""
 import json
 
 from ostorlab.agent import definitions as agent_definitions

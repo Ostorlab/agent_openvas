@@ -26,7 +26,7 @@ class OpenVas:
         Args:
             ip: Target ip to scan.
         Returns:
-            task_id: str
+            OpenVas task identifier.
         """
         connection = gvm.connections.TLSConnection(hostname='localhost')
         transform = transforms.EtreeTransform()
@@ -50,7 +50,7 @@ class OpenVas:
             port_list_id: ports to scan
 
         Returns:
-            - target id.
+            OpenVas target identifier.
         """
         name = f'Testing Host {ip} {datetime.datetime.now()}'
         response = gmp.create_target(name=name, hosts=[ip], port_list_id=port_list_id)
@@ -62,12 +62,12 @@ class OpenVas:
         Args:
             gmp: GMP object.
             ip: Target ip to scan.
-            target_id: hosts scanned by the task.
+            target_id: Ids of hosts targeted by the scan.
             scan_config_id: scan configuration used by the task
             scanner_id: scanner to use for scanning the target.
 
         Returns:
-            - task id.
+            - OpenVas task identifier.
         """
         name = f'Scan Host {ip}'
         response = gmp.create_task(name=name, config_id=scan_config_id, target_id=target_id, scanner_id=scanner_id,)
@@ -87,6 +87,14 @@ class OpenVas:
         return response[0].text
 
     def wait_task(self, task_id: str) -> bool:
+        """check gmp task status and wait until it is Done.
+
+        Args:
+            task_id: task id.
+
+        Returns:
+            - bool task status.
+        """
         logger.info('Waiting for task %s', task_id)
         connection = gvm.connections.TLSConnection(hostname='localhost')
         transform = transforms.EtreeTransform()
@@ -106,6 +114,11 @@ class OpenVas:
                 time.sleep(WAIT_TIME)
 
     def get_results(self) -> str:
+        """get gmp report result in csv format.
+
+        Returns:
+            - str csv results.
+        """
         connection = gvm.connections.TLSConnection(hostname='localhost')
         transform = transforms.EtreeTransform()
         with openvas_gmp.Gmp(connection, transform=transform) as gmp:

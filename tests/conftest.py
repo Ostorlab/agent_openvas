@@ -8,7 +8,7 @@ from ostorlab.agent import message
 def scan_message():
     """Creates a dummy message of type v3.asset.ip to be used by the agent for testing purposes.
     """
-    selector = 'v3.asset.ip'
+    selector = 'v3.asset.ip.v4'
     msg_data = {
             'host': '209.235.136.112',
             'mask': '32',
