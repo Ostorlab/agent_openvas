@@ -1,11 +1,7 @@
 """Unittests for nuclei class."""
-from unittest import mock
-
 from ostorlab.agent import definitions as agent_definitions
-from ostorlab.agent.kb import kb
 from ostorlab.runtimes import definitions as runtime_definitions
 from ostorlab.utils import defintions as utils_definitions
-from ostorlab.agent.mixins import agent_report_vulnerability_mixin
 
 from agent import openvas_agent
 
