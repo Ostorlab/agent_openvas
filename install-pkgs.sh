@@ -9,8 +9,6 @@ curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 
 apt-get update
 
-export TERM=xterm
-
 apt install -y \
 bison \
 build-essential \
@@ -50,14 +48,6 @@ pkg-config \
 postfix \
 postgresql-12 \
 postgresql-server-dev-12 \
-python3-defusedxml \
-python3-dialog \
-python3-lxml \
-python3-paramiko \
-python3-pip \
-python3-polib \
-python3-psutil \
-python3-setuptools \
 redis-server \
 redis-tools \
 rsync \
@@ -72,7 +62,15 @@ whiptail \
 xml-twig-tools \
 xsltproc
 
-apt install -y wget
+apt install -y \
+python3-defusedxml \
+python3-dialog \
+python3-lxml \
+python3-paramiko \
+python3-pip \
+python3-polib \
+python3-psutil \
+python3-setuptools \
 
 
 
