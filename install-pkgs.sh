@@ -9,6 +9,8 @@ curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 
 apt-get update
 
+export TERM=xterm
+
 apt install -y \
 bison \
 build-essential \
@@ -61,6 +63,18 @@ wget \
 whiptail \
 xml-twig-tools \
 xsltproc
+
+apt install -y \
+python3-defusedxml \
+python3-dialog \
+python3-lxml \
+python3-paramiko \
+python3-pip \
+python3-polib \
+python3-psutil \
+python3-setuptools \
+
+
 
 # Install Node.js
 curl -sL https://deb.nodesource.com/setup_10.x | bash -
