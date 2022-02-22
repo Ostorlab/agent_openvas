@@ -1,10 +1,3 @@
-FROM python:3.8-slim-buster as base
-FROM base as builder
-RUN mkdir /install
-WORKDIR /install
-COPY requirement.txt /requirement.txt
-RUN pip install --prefix=/install -r /requirement.txt
-
 FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -128,10 +121,21 @@ RUN echo "/usr/local/lib" > /etc/ld.so.conf.d/openvas.conf \
     && chmod +x sync.py
 
 
-COPY --from=builder /install /usr/local
+RUN apt-get update && apt-get install -y python3.8 \
+                                        python3.8-dev \
+                                        python3-pip \
+                                        && \
+                                        python3.8 -m pip install --upgrade pip
+COPY requirement.txt /requirement.txt
+RUN python3 -m pip install -r /requirement.txt
+RUN /start.sh
 RUN mkdir -p /app/agent
 ENV PYTHONPATH=/app
 COPY agent /app/agent
 COPY ostorlab.yaml /app/agent/ostorlab.yaml
+RUN mkdir -p /app/ostorlab
+COPY ostorlab_client /app/ostorlab
+WORKDIR /app/ostorlab
+RUN  python3 -m pip install .
 WORKDIR /app
-CMD ["python3", "/app/agent/template_agent.py"]
+CMD ["python3", "/app/agent/openvas_agent.py"]

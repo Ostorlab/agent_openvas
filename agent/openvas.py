@@ -2,7 +2,7 @@
 import datetime
 import logging
 import base64
-import csv, json
+import socket
 import time
 
 import gvm
@@ -30,10 +30,14 @@ class OpenVas:
         transform = transforms.EtreeTransform()
         with openvas_gmp.Gmp(connection, transform=transform) as gmp:
             gmp.authenticate(GMP_USERNAME, GMP_PASSWORD)
+            logger.debug('Creating target')
             target_id = self._create_target(gmp, ip, ALL_IANA_ASSIGNED_TCP_UDP)
+            logger.debug('Creating task for target %s', target_id)
             task_id = self._create_task(gmp, ip, target_id, GVMD_FULL_FAST_CONFIG, OPENVAS_SCANNER_ID,)
+            logger.debug('Creating report for task %s', task_id)
             report_id = self._start_task(gmp, task_id)
             logger.info('Started scan of host %s. Corresponding report ID is %s', str(ip), str(report_id))
+            return task_id
 
     def _create_target(self, gmp, ip, port_list_id):
         """Create gmp target https://docs.greenbone.net/API/GMP/gmp-21.04.html#command_create_target.
@@ -81,18 +85,22 @@ class OpenVas:
         return response[0].text
 
     def wait_task(self, task_id):
+        logger.info('Waiting for task %s', task_id)
         connection = gvm.connections.TLSConnection(hostname='localhost')
         transform = transforms.EtreeTransform()
         with openvas_gmp.Gmp(connection, transform=transform) as gmp:
             gmp.authenticate(GMP_USERNAME, GMP_PASSWORD)
             while True:
-                resp_tasks = gmp.get_tasks().xpath('task')
-                for task in resp_tasks:
-                    if task.xpath('@id')[0] == task_id:
-                        if task.find('status').text == 'Done':
-                            return True
-                        else:
-                            logger.info('Scan progress %s', str(task.find('status').text))
+                try:
+                    resp_tasks = gmp.get_tasks().xpath('task')
+                    for task in resp_tasks:
+                        logger.debug('Checking task %s', task.xpath('@id')[0])
+                        if task.xpath('@id')[0] == task_id:
+                            logger.info('Scan progress %s', str(task.find('progress').text))
+                            if task.find('status').text == 'Done':
+                                return True
+                except socket.timeout:
+                    logger.error('Socket timeout error')
                 time.sleep(WAIT_TIME)
 
     def get_results(self):
