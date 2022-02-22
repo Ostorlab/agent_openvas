@@ -24,7 +24,7 @@ def testAgentOpenVas_whenBinaryAvailable_RunScan(scan_message, mocker):
         healthcheck_port=5301)
     mocker.patch('agent.openvas.OpenVas.start_scan',return_value='hduzehfuhehfuhef')
     mocker.patch('agent.openvas.OpenVas.wait_task',return_value=None)
-    with open('tests/openvas_result.csv', 'r') as f:
+    with open('tests/openvas_result.csv', 'r', encoding='UTF-8') as f:
         mocker.patch('agent.openvas.OpenVas.get_results',return_value=f.read())
         mock_report_vulnerability = mocker.patch('agent.openvas_agent.OpenVasAgent.report_vulnerability',
                                                  return_value=None)
@@ -48,4 +48,5 @@ def testAgentOpenVas_whenBinaryAvailable_RunScan(scan_message, mocker):
                                                                      targeted_by_nation_state=False,
                                                                      cvss_v3_vector=''),
                                                      risk_rating= agent_report_vulnerability_mixin.RiskRating.INFO,
-                                                     technical_detail= f'```json\n{json.dumps(output, indent=4, sort_keys=True)}\n```')
+                                                     technical_detail=
+                                                     f'```json\n{json.dumps(output, indent=4, sort_keys=True)}\n```')
