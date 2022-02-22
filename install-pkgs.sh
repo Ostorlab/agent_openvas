@@ -9,6 +9,8 @@ curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 
 apt-get update
 
+export TERM=xterm
+
 apt install -y \
 bison \
 build-essential \
