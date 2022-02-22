@@ -59,7 +59,6 @@ texlive-fonts-recommended \
 texlive-latex-extra \
 uuid-dev \
 wapiti \
-wget \
 whiptail \
 xml-twig-tools \
 xsltproc
@@ -74,6 +73,7 @@ python3-polib \
 python3-psutil \
 python3-setuptools \
 
+apt install -y wget
 
 
 # Install Node.js
