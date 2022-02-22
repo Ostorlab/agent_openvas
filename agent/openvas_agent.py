@@ -31,15 +31,15 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
     def start(self) -> None:
         """Calls that start.sh script to bootstrap the scanner."""
         logger.info('starting openvas daemons')
-        subprocess.run(START_SCRIPT)
+        subprocess.run(START_SCRIPT, check=True)
         self._wait_vt_ready()
 
     def process(self, message: m.Message) -> None:
         logger.info('processing message')
-        openVas = openvas.OpenVas()
-        task_id = openVas.start_scan(message.data.get('host'))
-        openVas.wait_task(task_id)
-        result = openVas.get_results()
+        openvas_wrapper = openvas.OpenVas()
+        task_id = openvas_wrapper.start_scan(message.data.get('host'))
+        openvas_wrapper.wait_task(task_id)
+        result = openvas_wrapper.get_results()
         self._send_results(result)
         logger.info('Scan finished.')
 

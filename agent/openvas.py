@@ -108,12 +108,12 @@ class OpenVas:
         transform = transforms.EtreeTransform()
         with openvas_gmp.Gmp(connection, transform=transform) as gmp:
             gmp.authenticate(GMP_USERNAME, GMP_PASSWORD)
-            report_format_id = ""
-            report_format = gmp.get_report_formats()
-            for report in report_format:
-                for format in report:
+            report_format_id = ''
+            report_formats = gmp.get_report_formats()
+            for report_format in report_formats:
+                for format in report_format:
                     if format.text == 'CSV result list.':
-                        report_format_id = report.attrib.get('id')
+                        report_format_id = report_format.attrib.get('id')
 
             result_reports = []
             all_reports = gmp.get_reports()
@@ -125,10 +125,9 @@ class OpenVas:
 
             # Get out the reports and get them as csv files to use
             for report_id in result_reports:
-                response = gmp.get_report(report_id, report_format_id=report_format_id,
-                                           filter="apply_overrides=0 min_qod=70",
-                                           ignore_pagination=True, details=True)
-                report_element = response.find("report")
-                content = report_element.find("report_format").tail
-                data = str(base64.b64decode(content), "utf-8")
+                response = gmp.get_report(report_id, report_format_id=report_format_id,ignore_pagination=True,
+                                          details=True)
+                report_element = response.find('report')
+                content = report_element.find('report_format').tail
+                data = str(base64.b64decode(content), 'utf-8')
                 return data
