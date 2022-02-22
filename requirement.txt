@@ -1,3 +1,4 @@
+ostorlab
 rich
 python-gvm==1.6.0
 gvm-tools==2.1.0
