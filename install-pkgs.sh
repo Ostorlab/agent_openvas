@@ -9,68 +9,69 @@ curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 
 apt-get update
 
-{ cat <<EOF
-bison
-build-essential
-ca-certificates
-cmake
-curl
-gcc
-gcc-mingw-w64
-geoip-database
-gnutls-bin
-graphviz
-heimdal-dev
-ike-scan
-libgcrypt20-dev
-libglib2.0-dev
-libgnutls28-dev
-libgpgme11-dev
-libgpgme-dev
-libhiredis-dev
-libical-dev
-libksba-dev
-libldap2-dev
-libmicrohttpd-dev
-libnet-snmp-perl
-libpcap-dev
-libpopt-dev
-libsnmp-dev
-libssh-gcrypt-dev
-libxml2-dev
-net-tools
-nmap
-nsis
-openssh-client
-openssh-server
-perl-base
-pkg-config
-postfix
-postgresql-12
-postgresql-server-dev-12
-python3-defusedxml
-python3-dialog
-python3-lxml
-python3-paramiko
-python3-pip
-python3-polib
-python3-psutil
-python3-setuptools
-redis-server
-redis-tools
-rsync
-smbclient
-sshpass
-texlive-fonts-recommended
-texlive-latex-extra
-uuid-dev
-wapiti
-wget
-whiptail
-xml-twig-tools
+apt install -y \
+bison \
+build-essential \
+ca-certificates \
+cmake \
+curl \
+gcc \
+gcc-mingw-w64 \
+geoip-database \
+gnutls-bin \
+graphviz \
+heimdal-dev \
+ike-scan \
+libgcrypt20-dev \
+libglib2.0-dev \
+libgnutls28-dev \
+libgpgme11-dev \
+libgpgme-dev \
+libhiredis-dev \
+libical-dev \
+libksba-dev \
+libldap2-dev \
+libmicrohttpd-dev \
+libnet-snmp-perl \
+libpcap-dev \
+libpopt-dev \
+libsnmp-dev \
+libssh-gcrypt-dev \
+libxml2-dev \
+net-tools \
+nmap \
+nsis \
+openssh-client \
+openssh-server \
+perl-base \
+pkg-config \
+postfix \
+postgresql-12 \
+postgresql-server-dev-12 \
+redis-server \
+redis-tools \
+rsync \
+smbclient \
+sshpass \
+texlive-fonts-recommended \
+texlive-latex-extra \
+uuid-dev \
+wapiti \
+wget \
+whiptail \
+xml-twig-tools \
 xsltproc
-EOF
-} | xargs apt-get install -yq --no-install-recommends
+
+apt install -y \
+python3-defusedxml \
+python3-dialog \
+python3-lxml \
+python3-paramiko \
+python3-pip \
+python3-polib \
+python3-psutil \
+python3-setuptools \
+
 
 
 # Install Node.js
