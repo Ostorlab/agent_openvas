@@ -12,6 +12,7 @@ apt-get update
 export TERM=xterm
 
 apt install -y \
+apt-utils \
 bison \
 build-essential \
 ca-certificates \
@@ -72,8 +73,6 @@ python3-pip \
 python3-polib \
 python3-psutil \
 python3-setuptools \
-
-apt install -y wget
 
 
 # Install Node.js
