@@ -111,8 +111,8 @@ class OpenVas:
             report_format_id = ''
             report_formats = gmp.get_report_formats()
             for report_format in report_formats:
-                for format in report_format:
-                    if format.text == 'CSV result list.':
+                for rf in report_format:
+                    if rf.text == 'CSV result list.':
                         report_format_id = report_format.attrib.get('id')
 
             result_reports = []
