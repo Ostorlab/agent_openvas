@@ -72,6 +72,8 @@ whiptail \
 xml-twig-tools \
 xsltproc
 
+apt install -y wget
+
 
 
 # Install Node.js
