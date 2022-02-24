@@ -66,7 +66,7 @@ description: |
   ## License
   [Apache](./LICENSE)
 
-license: Apache
+license: Apache-2.0
 source: https://github.com/Ostorlab/agent_openvas
 in_selectors:
   - v3.asset.ip.v4
