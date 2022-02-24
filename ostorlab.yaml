@@ -64,7 +64,7 @@ description: |
 
 
   ## License
-  [Apache](./LICENSE)
+  [Apache-2.0](./LICENSE)
 
 license: Apache-2.0
 source: https://github.com/Ostorlab/agent_openvas
