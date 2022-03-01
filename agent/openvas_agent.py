@@ -1,16 +1,15 @@
 """Sample agent implementation"""
+import csv
+import json
 import logging
 import subprocess
 import time
-import csv
-import json
-
-from rich import logging as rich_logging
 
 from ostorlab.agent import agent
 from ostorlab.agent import message as m
-from ostorlab.agent.mixins import agent_report_vulnerability_mixin
 from ostorlab.agent.kb import kb
+from ostorlab.agent.mixins import agent_report_vulnerability_mixin
+from rich import logging as rich_logging
 
 from agent import openvas
 
@@ -26,6 +25,20 @@ LOG_FILE = '/usr/local/var/log/gvm/gvmd.log'
 VT_CHECK = b'Updating VTs in database ... done'
 WAIT_VT_LOAD = 30
 CSV_PATH_OUTPUT = '/tmp/csvFilePath.csv'
+
+def _severity_map(severity: str) -> agent_report_vulnerability_mixin.RiskRating:
+    if severity == 'log':
+        return agent_report_vulnerability_mixin.RiskRating.INFO
+    elif severity == 'low':
+        return agent_report_vulnerability_mixin.RiskRating.LOW
+    elif severity == 'medium':
+        return agent_report_vulnerability_mixin.RiskRating.MEDIUM
+    elif severity == 'high':
+        return agent_report_vulnerability_mixin.RiskRating.HIGH
+    else:
+        logger.warning('Unknown severity level %s, defaulting to INFO', severity)
+        return agent_report_vulnerability_mixin.RiskRating.INFO
+
 
 class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVulnMixin):
     """OpenVas Agent."""
@@ -75,9 +88,9 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
                 self.report_vulnerability(
                     entry=kb.Entry(
                         title='openvas',
-                        risk_rating=line_result.get('SEVERITY', 'INFO').upper(),
+                        risk_rating=_severity_map(line_result.get('severity', 'INFO').lower()).name,
                         cvss_v3_vector=line_result.get('CVSS', ''),
-                        short_description='',
+                        short_description=line_result.get('Vulnerability Detection Method', ''),
                         description=line_result.get('Summary', ''),
                         recommendation=line_result.get('Solution', ''),
                         references={},
@@ -89,7 +102,7 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
                         targeted_by_nation_state=False
                     ),
                     technical_detail=f'```json\n{json.dumps(line_result, indent=4, sort_keys=True)}\n```',
-                    risk_rating=agent_report_vulnerability_mixin.RiskRating.INFO)
+                    risk_rating=_severity_map(line_result.get('severity', 'INFO').lower()))
 
 
 if __name__ == '__main__':
