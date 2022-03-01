@@ -88,7 +88,7 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
                 self.report_vulnerability(
                     entry=kb.Entry(
                         title='openvas',
-                        risk_rating=_severity_map(line_result.get('severity', 'INFO').lower()).value,
+                        risk_rating=_severity_map(line_result.get('severity', 'INFO').lower()).name,
                         cvss_v3_vector=line_result.get('CVSS', ''),
                         short_description=line_result.get('Vulnerability Detection Method', ''),
                         description=line_result.get('Summary', ''),
