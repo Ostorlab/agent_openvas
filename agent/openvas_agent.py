@@ -26,6 +26,7 @@ VT_CHECK = b'Updating VTs in database ... done'
 WAIT_VT_LOAD = 30
 CSV_PATH_OUTPUT = '/tmp/csvFilePath.csv'
 
+
 def _severity_map(severity: str) -> agent_report_vulnerability_mixin.RiskRating:
     if severity == 'log':
         return agent_report_vulnerability_mixin.RiskRating.INFO
@@ -85,13 +86,16 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
         with open(CSV_PATH_OUTPUT, encoding='UTF-8') as csv_file:
             line_results = csv.DictReader(csv_file)
             for line_result in line_results:
+                detail = line_result.get("Specific Result", "")
+                detail += '\n'
+                detail += f'```json\n{json.dumps(line_result, indent=4, sort_keys=True)}\n```'
                 self.report_vulnerability(
                     entry=kb.Entry(
-                        title='openvas',
+                        title=line_result.get('NVT Name', 'OpenVas Finding'),
                         risk_rating=_severity_map(line_result.get('severity', 'INFO').lower()).name,
                         cvss_v3_vector=line_result.get('CVSS', ''),
-                        short_description=line_result.get('Vulnerability Detection Method', ''),
-                        description=line_result.get('Summary', ''),
+                        short_description=line_result.get('Summary', ''),
+                        description=line_result.get('Summary', '') + line_result.get('Vulnerability Insight', ''),
                         recommendation=line_result.get('Solution', ''),
                         references={},
                         security_issue=True,
@@ -101,7 +105,7 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
                         targeted_by_ransomware=False,
                         targeted_by_nation_state=False
                     ),
-                    technical_detail=f'```json\n{json.dumps(line_result, indent=4, sort_keys=True)}\n```',
+                    technical_detail=detail,
                     risk_rating=_severity_map(line_result.get('severity', 'INFO').lower()))
 
 
