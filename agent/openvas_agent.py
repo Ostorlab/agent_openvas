@@ -86,7 +86,7 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
         with open(CSV_PATH_OUTPUT, encoding='UTF-8') as csv_file:
             line_results = csv.DictReader(csv_file)
             for line_result in line_results:
-                detail = line_result.get("Specific Result", "")
+                detail = line_result.get('Specific Result', '')
                 detail += '\n'
                 detail += f'```json\n{json.dumps(line_result, indent=4, sort_keys=True)}\n```'
                 self.report_vulnerability(
