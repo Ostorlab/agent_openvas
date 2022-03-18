@@ -1,4 +1,4 @@
-ostorlab
-rich
+ostorlab[agent]
 python-gvm==1.6.0
 gvm-tools==2.1.0
+rich
