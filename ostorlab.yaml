@@ -1,6 +1,6 @@
 kind: Agent
 name: openvas
-version: 0.0.2
+version: 0.0.3
 image: images/logo.png
 description: |
   This repository is an implementation of the OpenVas agent.
@@ -71,6 +71,7 @@ source: https://github.com/Ostorlab/agent_openvas
 in_selectors:
   - v3.asset.ip.v4
   - v3.asset.ip.v6
+  - v3.asset.domain_name
 out_selectors:
   - v3.report.vulnerability
 docker_file_path : Dockerfile
