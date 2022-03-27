@@ -49,11 +49,14 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
         logger.info('starting openvas daemons')
         subprocess.run(START_SCRIPT, check=True)
         self._wait_vt_ready()
+        logger.info('vt is ready')
 
     def process(self, message: m.Message) -> None:
-        logger.info('processing message')
+        logger.info('processing message from selector %s', message.selector)
         openvas_wrapper = openvas.OpenVas()
-        task_id = openvas_wrapper.start_scan(message.data.get('host'))
+        target = message.data.get('name') or message.data.get('host')
+        logger.info('scanning target %s', target)
+        task_id = openvas_wrapper.start_scan(target)
         openvas_wrapper.wait_task(task_id)
         result = openvas_wrapper.get_results()
         self._persist_results(result)
