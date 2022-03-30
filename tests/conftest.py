@@ -1,4 +1,4 @@
-"""Pytest fixture for the nuclei agent."""
+"""Pytest fixture for the openvas agent."""
 import pytest
 
 from ostorlab.agent import message
