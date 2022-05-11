@@ -16,7 +16,7 @@ from agent import openvas
 logging.basicConfig(
     format='%(message)s',
     datefmt='[%X]',
-    handlers=[rich_logging.RichHandler(rich_tracebacks=True)]
+    handlers=[rich_logging.RichHandler(rich_tracebacks=True)],
     level='INFO',
     force=True
 )
