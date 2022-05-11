@@ -17,6 +17,8 @@ logging.basicConfig(
     format='%(message)s',
     datefmt='[%X]',
     handlers=[rich_logging.RichHandler(rich_tracebacks=True)]
+    level='INFO',
+    force=True
 )
 logger = logging.getLogger(__name__)
 
