@@ -4,6 +4,7 @@ import json
 import logging
 import subprocess
 import time
+from urllib import parse
 
 from ostorlab.agent import agent
 from ostorlab.agent import message as m
@@ -56,7 +57,7 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
     def process(self, message: m.Message) -> None:
         logger.info('processing message from selector %s', message.selector)
         openvas_wrapper = openvas.OpenVas()
-        target = message.data.get('name') or message.data.get('host')
+        target = self._prepare_target(message)
         logger.info('scanning target %s', target)
         task_id = openvas_wrapper.start_scan(target)
         openvas_wrapper.wait_task(task_id)
@@ -64,6 +65,16 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
         self._persist_results(result)
         self._process_results()
         logger.info('Scan finished.')
+
+    def _prepare_target(self, message: m.Message) -> str:
+        """Prepare targets based on type, if a domain name is provided, port and protocol are collected from the config.
+        """
+        if message.data.get('name') is not None:
+            return message.data.get('name')
+        elif message.data.get('host'):
+            return message.data.get('host')
+        elif message.data.get('url') is not None:
+            return parse.urlparse(message.data.get('url')).netloc
 
     def _wait_vt_ready(self):
         """when started, Openvas first loads all the VT to the database

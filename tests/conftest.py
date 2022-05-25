@@ -15,3 +15,15 @@ def scan_message():
             'version': 4
         }
     return message.Message.from_data(selector, data=msg_data)
+
+
+@pytest.fixture
+def scan_message_link():
+    """Creates a dummy message of type v3.asset.ip.v4 to be used by the agent for testing purposes.
+    """
+    selector = 'v3.asset.link'
+    msg_data = {
+            'url': 'https://test.ostorlab.co',
+            'method': 'GET'
+        }
+    return message.Message.from_data(selector, data=msg_data)
