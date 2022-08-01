@@ -122,11 +122,11 @@ RUN echo "/usr/local/lib" > /etc/ld.so.conf.d/openvas.conf \
     && chmod +x sync.py
 
 
-RUN apt-get update && apt-get install -y python3.8 \
-                                        python3.8-dev \
+RUN apt-get update && apt-get install -y python3.10 \
+                                        python3.10-dev \
                                         python3-pip \
                                         && \
-                                        python3.8 -m pip install --upgrade pip
+                                        python3.10 -m pip install --upgrade pip
 COPY requirement.txt /requirement.txt
 RUN python3 -m pip install -r /requirement.txt
 RUN /start.sh
