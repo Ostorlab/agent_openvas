@@ -44,13 +44,13 @@ if  [ ! -d /data/database ]; then
 	echo "Creating Database folder..."
 	mkdir /data/database
 	chown postgres:postgres -R /data/database
-	su -c "/usr/lib/postgresql/12/bin/initdb /data/database" postgres
+	su -c "/usr/lib/postgresql/14/bin/initdb /data/database" postgres
 fi
 
 chown postgres:postgres -R /data/database
 
 echo "Starting PostgreSQL..."
-su -c "/usr/lib/postgresql/12/bin/pg_ctl -D /data/database start" postgres
+su -c "/usr/lib/postgresql/14/bin/pg_ctl -D /data/database start" postgres
 
 if  [ ! -d /data/ssh ]; then
 	echo "Creating SSH folder..."
@@ -109,7 +109,7 @@ if [ ! -f "/data/firstrun" ]; then
 	
 	chown postgres:postgres -R /data/database
 	
-	su -c "/usr/lib/postgresql/12/bin/pg_ctl -D /data/database restart" postgres
+	su -c "/usr/lib/postgresql/14/bin/pg_ctl -D /data/database restart" postgres
 	
 	touch /data/firstrun
 fi
@@ -203,6 +203,8 @@ if [ ! -h /usr/local/var/lib/gvm/scap-data ]; then
 fi
 
 # Sync NVTs, CERT data, and SCAP data on container start
+# greenbone-scapdata-sync
+# greenbone-scapdata-sync --refresh-private
 /sync-all.sh
 
 if [ -f /var/run/ospd.pid ]; then
@@ -281,4 +283,3 @@ if [ $SSHD == "true" ]; then
 fi
 
 echo "READY"
-

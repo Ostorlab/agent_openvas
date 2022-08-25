@@ -4,12 +4,13 @@ apt-get update
 
 apt-get install -y gnupg curl
 
-echo "deb http://apt.postgresql.org/pub/repos/apt focal-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+echo "deb http://apt.postgresql.org/pub/repos/apt jammy-pgdg main" > /etc/apt/sources.list.d/pgdg.list
 curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 
 apt-get update
 
-apt install -y \
+apt-get install -y \
+libssh-dev \
 bison \
 build-essential \
 ca-certificates \
@@ -36,7 +37,6 @@ libnet-snmp-perl \
 libpcap-dev \
 libpopt-dev \
 libsnmp-dev \
-libssh-gcrypt-dev \
 libxml2-dev \
 net-tools \
 nmap \
@@ -46,8 +46,6 @@ openssh-server \
 perl-base \
 pkg-config \
 postfix \
-postgresql-12 \
-postgresql-server-dev-12 \
 redis-server \
 redis-tools \
 rsync \
@@ -60,7 +58,9 @@ wapiti \
 wget \
 whiptail \
 xml-twig-tools \
-xsltproc
+xsltproc \
+postgresql-14 \
+postgresql-server-dev-14 \
 
 apt install -y \
 python3-defusedxml \
@@ -70,20 +70,20 @@ python3-paramiko \
 python3-pip \
 python3-polib \
 python3-psutil \
-python3-setuptools \
+python3-setuptools
 
 
-
+# Down is mandatory
 # Install Node.js
-curl -sL https://deb.nodesource.com/setup_10.x | bash -
+curl -sL https://deb.nodesource.com/setup_12.x | bash
 apt-get install nodejs -yq --no-install-recommends
 
 
 # Install Yarn
-curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+curl -sLS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 apt-get update
-apt-get install yarn -yq --no-install-recommends
-
+apt-get install yarn -y
+yarn install
 
 rm -rf /var/lib/apt/lists/*

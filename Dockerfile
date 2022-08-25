@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
@@ -6,16 +6,34 @@ ENV LANG=C.UTF-8
 COPY install-pkgs.sh /install-pkgs.sh
 RUN bash /install-pkgs.sh
 
+RUN apt-get update && apt-get install -y wget cmake
 
-ENV gvm_libs_version="v11.0.1" \
-    openvas_scanner_version="v7.0.1" \
-    gvmd_version="v9.0.1" \
-    gsa_version="v9.0.1" \
-    gvm_tools_version="2.1.0" \
-    openvas_smb="v1.0.5" \
+ENV gvm_libs_version="v20.8.1" \
+    openvas_scanner_version="v20.8.1" \
+    gvmd_version="v20.8.1" \
+    gsa_version="v20.8.1" \
+    gvm_tools_version="21.1.0" \
+    openvas_smb="v22.4.0" \
     open_scanner_protocol_daemon="v2.0.1" \
-    ospd_openvas="v1.0.1" \
-    python_gvm_version="1.6.0"
+    ospd_openvas="v20.8.1" \
+    python_gvm_version="v20.11.0"
+
+RUN apt-get update && apt-get install -y  libgnutls28-dev \
+                        libssh-dev \
+                        libhiredis-dev \ 
+                        libxml2-dev \ 
+                        libgpgme-dev \ 
+                        heimdal-dev \ 
+                        libpopt-dev \ 
+                        gcc-mingw-w64 \
+                        libical-dev \
+                        libpcap-dev \ 
+                        libksba-dev \ 
+                        bison \
+                        curl \
+                        libmicrohttpd-dev \
+                        postgresql-14 \
+                        postgresql-server-dev-14 
 
 # Install libraries module for the GVM Libs.
 RUN mkdir /build && \
@@ -31,7 +49,7 @@ RUN mkdir /build && \
     cd / && \
     rm -rf /build
 
-
+RUN apt-get install -y libunistring-dev
 # Install SMB module.
 RUN mkdir /build && \
     cd /build && \
@@ -61,7 +79,7 @@ RUN mkdir /build && \
     cd / && \
     rm -rf /build
 
-
+ 
 # Install OpenVAS.
 RUN mkdir /build && \
     cd /build && \
@@ -75,7 +93,6 @@ RUN mkdir /build && \
     make install && \
     cd / && \
     rm -rf /build
-
 
 # Install GSA.
 RUN mkdir /build && \
@@ -92,18 +109,19 @@ RUN mkdir /build && \
     rm -rf /build
 
 
-# Install OSPd daemon.
-RUN mkdir /build && \
-    cd /build && \
-    wget --no-verbose https://github.com/greenbone/ospd/archive/$open_scanner_protocol_daemon.tar.gz && \
-    tar -zxf $open_scanner_protocol_daemon.tar.gz && \
-    cd /build/*/ && \
-    python3 setup.py install && \
-    cd / && \
-    rm -rf /build
+# # Install OSPd daemon.
+# RUN mkdir /build && \
+#     cd /build && \
+#     wget --no-verbose https://github.com/greenbone/ospd/archive/$open_scanner_protocol_daemon.tar.gz && \
+#     tar -zxf $open_scanner_protocol_daemon.tar.gz && \
+#     cd /build/*/ && \
+#     python3 setup.py install && \
+#     cd / && \
+#     rm -rf /build
 
 
 # Install Open Scanner Protocol for OpenVAS
+RUN apt-get install -y python3-setuptools
 RUN mkdir /build && \
     cd /build && \
     wget --no-verbose https://github.com/greenbone/ospd-openvas/archive/$ospd_openvas.tar.gz && \
@@ -122,11 +140,11 @@ RUN echo "/usr/local/lib" > /etc/ld.so.conf.d/openvas.conf \
     && chmod +x sync.py
 
 
-RUN apt-get update && apt-get install -y python3.10 \
-                                        python3.10-dev \
-                                        python3-pip \
-                                        && \
-                                        python3.10 -m pip install --upgrade pip
+RUN apt-get install -y python3.10 \
+                    python3.10-dev \
+                    python3-pip \
+                    && \
+                    python3.10 -m pip install --upgrade pip
 COPY requirement.txt /requirement.txt
 RUN python3 -m pip install -r /requirement.txt
 RUN /start.sh
