@@ -11,7 +11,6 @@ RUN python3 -m pip install -r /requirement.txt
 RUN mkdir -p /app/agent
 ENV PYTHONPATH=/app
 COPY agent /app/agent
-COPY tests /app/tests
 COPY ostorlab.yaml /app/agent/ostorlab.yaml
 WORKDIR /app
 ENTRYPOINT ["/usr/bin/env"]
