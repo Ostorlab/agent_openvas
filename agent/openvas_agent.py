@@ -23,7 +23,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-START_SCRIPT = '/start.sh'
+START_SCRIPT = '/scripts/start.sh'
 LOG_FILE = '/usr/local/var/log/gvm/gvmd.log'
 VT_CHECK = b'Updating VTs in database ... done'
 WAIT_VT_LOAD = 30
@@ -62,8 +62,9 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
         task_id = openvas_wrapper.start_scan(target)
         openvas_wrapper.wait_task(task_id)
         result = openvas_wrapper.get_results()
-        self._persist_results(result)
-        self._process_results()
+        if result is not None:
+            self._persist_results(result)
+            self._process_results()
         logger.info('Scan finished.')
 
     def _prepare_target(self, message: m.Message) -> str:
