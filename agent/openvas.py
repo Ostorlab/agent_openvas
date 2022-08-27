@@ -127,7 +127,7 @@ class OpenVas:
             report_formats = gmp.get_report_formats()
             for report_format in report_formats:
                 for rf in report_format:
-                    if rf.text == 'CSV result list.':
+                    if rf.text is not None and rf.text.startswith('CSV result list.'):
                         report_format_id = report_format.attrib.get('id')
 
             result_reports = []
@@ -140,9 +140,10 @@ class OpenVas:
 
             # Get out the reports and get them as csv files to use
             for report_id in result_reports:
-                response = gmp.get_report(report_id, report_format_id=report_format_id,ignore_pagination=True,
+                response = gmp.get_report(report_id, report_format_id=report_format_id, ignore_pagination=True,
                                           details=True)
                 report_element = response.find('report')
-                content = report_element.find('report_format').tail
-                data = str(base64.b64decode(content), 'utf-8')
-                return data
+                if report_element is not None and report_element.find('report_format') is not None:
+                    content = report_element.find('report_format').tail
+                    data = str(base64.b64decode(content), 'utf-8')
+                    return data

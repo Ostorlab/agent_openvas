@@ -3,3 +3,5 @@ pylint-quotes
 pytest
 pytest-cov
 pytest-mock
+python-gvm==21.11.0
+gvm-tools==21.10.0
