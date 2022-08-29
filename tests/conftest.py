@@ -11,7 +11,7 @@ from agent import openvas_agent
 
 
 @pytest.fixture(scope='function', name='openvas_agent')
-def fixture_agent(agent_mock):
+def fixture_agent(agent_mock, agent_persist_mock):
     """OpenVasAgent fixture for testing purposes."""
     del agent_mock
     with (pathlib.Path(__file__).parent.parent / 'ostorlab.yaml').open() as yaml_o:
@@ -56,5 +56,17 @@ def scan_message_link():
     msg_data = {
         'url': 'https://test.ostorlab.co',
         'method': 'GET'
+    }
+    return message.Message.from_data(selector, data=msg_data)
+
+
+@pytest.fixture
+def ip_range_message():
+    """Creates a dummy message of type v3.asset.ip with a /31 mask to be used by the agent for testing purposes."""
+    selector = 'v3.asset.ip.v4'
+    msg_data = {
+        'host': '128.0.0.1',
+        'mask': '31',
+        'version': 4
     }
     return message.Message.from_data(selector, data=msg_data)
