@@ -5,11 +5,13 @@ import logging
 import subprocess
 import time
 from urllib import parse
+import ipaddress
 
 from ostorlab.agent import agent
 from ostorlab.agent import message as m
 from ostorlab.agent.kb import kb
 from ostorlab.agent.mixins import agent_report_vulnerability_mixin
+from ostorlab.agent.mixins import agent_persist_mixin as persist_mixin
 from rich import logging as rich_logging
 
 from agent import openvas
@@ -28,6 +30,7 @@ LOG_FILE = '/usr/local/var/log/gvm/gvmd.log'
 VT_CHECK = b'Updating VTs in database ... done'
 WAIT_VT_LOAD = 30
 CSV_PATH_OUTPUT = '/tmp/csvFilePath.csv'
+STORAGE_NAME = 'agent_openvas_asset'
 
 
 def _severity_map(severity: str) -> agent_report_vulnerability_mixin.RiskRating:
@@ -44,7 +47,7 @@ def _severity_map(severity: str) -> agent_report_vulnerability_mixin.RiskRating:
         return agent_report_vulnerability_mixin.RiskRating.INFO
 
 
-class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVulnMixin):
+class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVulnMixin, persist_mixin.AgentPersistMixin):
     """OpenVas Agent."""
 
     def start(self) -> None:
@@ -58,24 +61,61 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
         logger.info('processing message from selector %s', message.selector)
         openvas_wrapper = openvas.OpenVas()
         target = self._prepare_target(message)
-        logger.info('scanning target %s', target)
-        task_id = openvas_wrapper.start_scan(target)
-        openvas_wrapper.wait_task(task_id)
-        result = openvas_wrapper.get_results()
-        if result is not None:
-            self._persist_results(result)
-            self._process_results()
-        logger.info('Scan finished.')
+        if target is None:
+            return
+        else:
+            logger.info('scanning target %s', target)
+            task_id = openvas_wrapper.start_scan(target)
+            openvas_wrapper.wait_task(task_id)
+            result = openvas_wrapper.get_results()
+            if result is not None:
+                self._persist_results(result)
+                self._process_results()
+            logger.info('Scan finished.')
 
     def _prepare_target(self, message: m.Message) -> str:
         """Prepare targets based on type, if a domain name is provided, port and protocol are collected from the config.
         """
         if message.data.get('name') is not None:
-            return message.data.get('name')
+            target = self._prepare_domain_target(message)
+            return target
         elif message.data.get('host'):
-            return message.data.get('host')
+            target = self._prepare_ip_target(message)
+            return target
         elif message.data.get('url') is not None:
-            return parse.urlparse(message.data.get('url')).netloc
+            target = self._prepare_url_target(message)
+            return target
+
+    def _prepare_domain_target(self, message: m.Message) -> str:
+        """Prepares and checks if a domain asset has been processed before."""
+        target = message.data.get('name')
+        if not self.set_add(STORAGE_NAME, target):
+            logger.info('target %s was processed before, exiting', target)
+            return None
+        else:
+            return target
+
+    def _prepare_url_target(self, message: m.Message) -> str:
+        """Prepares and checks if an URL asset has been processed before."""
+        target = parse.urlparse(message.data.get('url')).netloc
+        if not self.set_add(STORAGE_NAME, target):
+            logger.info('target %s was processed before, exiting', target)
+            return None
+        else:
+            return target
+
+    def _prepare_ip_target(self, message: m.Message) -> str:
+        """Prepares and checks if an IP or a range of IPs assets has been processed before."""
+        host = message.data.get('host')
+        version = ipaddress.ip_address(host).version
+        default_mask = '32' if version == 4 else '164'
+        mask = message.data.get('mask', default_mask)
+        target = f'{host}/{mask}'
+        addresses = ipaddress.ip_network(target, strict=False)
+        if not self.add_ip_network(STORAGE_NAME, addresses):
+            logger.info('target %s was processed before, exiting', target)
+        else:
+            return target
 
     def _wait_vt_ready(self):
         """when started, Openvas first loads all the VT to the database
