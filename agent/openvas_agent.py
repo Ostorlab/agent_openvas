@@ -12,6 +12,8 @@ from ostorlab.agent import message as m
 from ostorlab.agent.kb import kb
 from ostorlab.agent.mixins import agent_report_vulnerability_mixin
 from ostorlab.agent.mixins import agent_persist_mixin as persist_mixin
+from ostorlab.agent import definitions as agent_definitions
+from ostorlab.runtimes import definitions as runtime_definitions
 from rich import logging as rich_logging
 
 from agent import openvas
@@ -49,6 +51,14 @@ def _severity_map(severity: str) -> agent_report_vulnerability_mixin.RiskRating:
 
 class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVulnMixin, persist_mixin.AgentPersistMixin):
     """OpenVas Agent."""
+
+    def __init__(self,
+                 agent_definition: agent_definitions.AgentDefinition,
+                 agent_settings: runtime_definitions.AgentSettings
+                ) -> None:
+        super().__init__(agent_definition, agent_settings)
+        persist_mixin.AgentPersistMixin.__init__(self, agent_settings)
+
 
     def start(self) -> None:
         """Calls the start.sh script to bootstrap the scanner."""
