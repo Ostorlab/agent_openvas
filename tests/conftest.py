@@ -31,6 +31,7 @@ def fixture_agent(agent_mock, agent_persist_mock):
                 ),
             ],
             healthcheck_port=5301,
+            redis_url='redis://guest:guest@localhost:6379'
         )
 
         agent = openvas_agent.OpenVasAgent(definition, settings)
