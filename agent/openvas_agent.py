@@ -120,7 +120,10 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
         version = ipaddress.ip_address(host).version
         default_mask = '32' if version == 4 else '164'
         mask = message.data.get('mask', default_mask)
-        target = f'{host}/{mask}'
+        if mask == default_mask:
+            target = host
+        else:
+            target = f'{host}/{mask}'
         addresses = ipaddress.ip_network(target, strict=False)
         if not self.add_ip_network(STORAGE_NAME, addresses):
             logger.info('target %s was processed before, exiting', target)
