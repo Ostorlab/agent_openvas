@@ -6,6 +6,8 @@ import subprocess
 import time
 from urllib import parse
 import ipaddress
+from typing import Optional, Union
+import re
 
 from ostorlab.agent import agent
 from ostorlab.agent.message import message as m
@@ -55,10 +57,10 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
     def __init__(self,
                  agent_definition: agent_definitions.AgentDefinition,
                  agent_settings: runtime_definitions.AgentSettings
-                ) -> None:
+                 ) -> None:
         super().__init__(agent_definition, agent_settings)
         persist_mixin.AgentPersistMixin.__init__(self, agent_settings)
-
+        self._scope_urls_regex: Optional[str] = self.args.get('scope_urls_regex')
 
     def start(self) -> None:
         """Calls the start.sh script to bootstrap the scanner."""
@@ -96,23 +98,36 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
             target = self._prepare_url_target(message)
             return target
 
-    def _prepare_domain_target(self, message: m.Message) -> str:
+    def _prepare_domain_target(self, message: m.Message) -> Union[str, None]:
         """Prepares and checks if a domain asset has been processed before."""
         target = message.data.get('name')
         if not self.set_add(STORAGE_NAME, target):
             logger.info('target %s was processed before, exiting', target)
             return None
         else:
-            return target
+            schema = self._get_schema(message)
+            port = self.args.get('port')
+            if schema == 'https' and port != 443:
+                url = f'https://{target}:{port}'
+            elif schema == 'https':
+                url = f'https://{target}'
+            elif port == 80:
+                url = f'http://{target}'
+            else:
+                url = f'{schema}://{target}:{port}'
 
-    def _prepare_url_target(self, message: m.Message) -> str:
+            return target if self._should_process_url(self._scope_urls_regex, url) else None
+
+    def _prepare_url_target(self, message: m.Message) -> Union[str, None]:
         """Prepares and checks if an URL asset has been processed before."""
         target = parse.urlparse(message.data.get('url')).netloc
         if not self.set_add(STORAGE_NAME, target):
             logger.info('target %s was processed before, exiting', target)
             return None
-        else:
+        elif self._should_process_url(self._scope_urls_regex, str(target)):
             return target
+        else:
+            return None
 
     def _prepare_ip_target(self, message: m.Message) -> str:
         """Prepares and checks if an IP or a range of IPs assets has been processed before."""
@@ -177,6 +192,25 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
                     ),
                     technical_detail=detail,
                     risk_rating=_severity_map(line_result.get('severity', 'INFO').lower()))
+
+    def _should_process_url(self, scope_urls_regex: Optional[str], url: str) -> bool:
+        if scope_urls_regex is None:
+            return True
+        link_in_scan_domain = re.match(scope_urls_regex, url) is not None
+        if not link_in_scan_domain:
+            logger.warning('link url %s is not in domain %s', url, scope_urls_regex)
+        return link_in_scan_domain
+
+    def _get_schema(self, message: m.Message) -> str:
+        """Returns the schema to be used for the target."""
+        if message.data.get('schema') is not None:
+            return str(message.data['schema'])
+        elif message.data.get('protocol') is not None:
+            return str(message.data['protocol'])
+        elif self.args.get('https') is True:
+            return 'https'
+        else:
+            return 'http'
 
 
 if __name__ == '__main__':

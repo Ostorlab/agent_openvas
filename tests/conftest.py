@@ -16,6 +16,13 @@ def fixture_agent(agent_mock, agent_persist_mock):
     del agent_mock
     with (pathlib.Path(__file__).parent.parent / 'ostorlab.yaml').open() as yaml_o:
         definition = agent_definitions.AgentDefinition.from_yaml(yaml_o)
+        definition.args = [
+            {
+                'name': 'scope_urls_regex',
+                'value': '([a-zA-Z]+://test.ostorlab.co/?.*)',
+                'type': 'string'
+            }
+        ]
         settings = runtime_definitions.AgentSettings(
             key='agent/ostorlab/openvas',
             bus_url='NA',
