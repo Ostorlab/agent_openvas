@@ -107,12 +107,14 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
         else:
             schema = self._get_schema(message)
             port = self.args.get('port')
-            if schema == 'https' and port != 443:
+            if schema == 'https' and port not in [443, None]:
                 url = f'https://{target}:{port}'
             elif schema == 'https':
                 url = f'https://{target}'
             elif port == 80:
                 url = f'http://{target}'
+            elif port is None:
+                url = f'{schema}://{target}'
             else:
                 url = f'{schema}://{target}:{port}'
 
@@ -124,10 +126,7 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
         if not self.set_add(STORAGE_NAME, target):
             logger.info('target %s was processed before, exiting', target)
             return None
-        elif self._should_process_url(self._scope_urls_regex, str(target)):
-            return target
-        else:
-            return None
+        return target if self._should_process_url(self._scope_urls_regex, str(message.data.get('url'))) else None
 
     def _prepare_ip_target(self, message: m.Message) -> str:
         """Prepares and checks if an IP or a range of IPs assets has been processed before."""
