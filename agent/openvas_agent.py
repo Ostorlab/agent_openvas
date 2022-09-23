@@ -6,7 +6,7 @@ import subprocess
 import time
 from urllib import parse
 import ipaddress
-from typing import Optional, Union
+from typing import Optional
 import re
 
 from ostorlab.agent import agent
