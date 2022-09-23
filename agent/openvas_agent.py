@@ -88,25 +88,9 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
     def _prepare_target(self, message: m.Message) -> str:
         """Prepare targets based on type, if a domain name is provided, port and protocol are collected from the config.
         """
-        if message.data.get('name') is not None:
-            target = self._prepare_domain_target(message)
-            return target
-        elif message.data.get('host'):
-            target = self._prepare_ip_target(message)
-            return target
-        elif message.data.get('url') is not None:
-            target = self._prepare_url_target(message)
-            return target
-
-    def _prepare_domain_target(self, message: m.Message) -> Union[str, None]:
-        """Prepares and checks if a domain asset has been processed before."""
-        target = message.data.get('name')
-        if not self.set_add(STORAGE_NAME, target):
-            logger.info('target %s was processed before, exiting', target)
-            return None
-        else:
+        if (target := message.data.get('name')) is not None:
             schema = self._get_schema(message)
-            port = self.args.get('port')
+            port = message.data.get('port')
             if schema == 'https' and port not in [443, None]:
                 url = f'https://{target}:{port}'
             elif schema == 'https':
@@ -117,8 +101,23 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
                 url = f'{schema}://{target}'
             else:
                 url = f'{schema}://{target}:{port}'
+            return self._prepare_domain_target(message) if \
+                self._should_process_target(self._scope_urls_regex, url) else None
+        elif message.data.get('host'):
+            target = self._prepare_ip_target(message)
+            return target
+        elif message.data.get('url') is not None:
+            return self._prepare_url_target(message) if \
+                self._should_process_target(self._scope_urls_regex, str(message.data.get('url'))) else None
 
-            return target if self._should_process_url(self._scope_urls_regex, url) else None
+    def _prepare_domain_target(self, message: m.Message) -> Union[str, None]:
+        """Prepares and checks if a domain asset has been processed before."""
+        target = message.data.get('name')
+        if not self.set_add(STORAGE_NAME, target):
+            logger.info('target %s was processed before, exiting', target)
+            return None
+        else:
+            return target
 
     def _prepare_url_target(self, message: m.Message) -> Union[str, None]:
         """Prepares and checks if an URL asset has been processed before."""
@@ -126,7 +125,8 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
         if not self.set_add(STORAGE_NAME, target):
             logger.info('target %s was processed before, exiting', target)
             return None
-        return target if self._should_process_url(self._scope_urls_regex, str(message.data.get('url'))) else None
+        else:
+            return target
 
     def _prepare_ip_target(self, message: m.Message) -> str:
         """Prepares and checks if an IP or a range of IPs assets has been processed before."""
@@ -192,7 +192,7 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
                     technical_detail=detail,
                     risk_rating=_severity_map(line_result.get('severity', 'INFO').lower()))
 
-    def _should_process_url(self, scope_urls_regex: Optional[str], url: str) -> bool:
+    def _should_process_target(self, scope_urls_regex: Optional[str], url: str) -> bool:
         if scope_urls_regex is None:
             return True
         link_in_scan_domain = re.match(scope_urls_regex, url) is not None
