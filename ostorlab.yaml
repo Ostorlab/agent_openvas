@@ -81,3 +81,6 @@ args:
   - name: "scope_regex"
     type: "string"
     description: "to define scanning scope."
+  - name: "scan_config_id"
+    type: "string"
+    description: "OpenVas scan configuration used by the task."
