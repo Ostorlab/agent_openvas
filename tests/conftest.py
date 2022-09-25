@@ -1,4 +1,6 @@
 """Pytest fixture for the openvas agent."""
+import json
+
 import pytest
 import pathlib
 
@@ -16,6 +18,7 @@ def fixture_agent(agent_mock, agent_persist_mock):
     del agent_mock
     with (pathlib.Path(__file__).parent.parent / 'ostorlab.yaml').open() as yaml_o:
         definition = agent_definitions.AgentDefinition.from_yaml(yaml_o)
+        definition.args[0]['value'] = 'ostorlab.co'
         settings = runtime_definitions.AgentSettings(
             key='agent/ostorlab/openvas',
             bus_url='NA',
@@ -24,10 +27,38 @@ def fixture_agent(agent_mock, agent_persist_mock):
                 utils_definitions.Arg(
                     name='reporting_engine_base_url',
                     type='string',
-                    value='https://toto.ostorlab.co/test',
+                    value=json.dumps('https://toto.ostorlab.co/test').encode(),
                 ),
                 utils_definitions.Arg(
-                    name='reporting_engine_token', type='string', value='123456'
+                    name='reporting_engine_token', type='string', value=json.dumps('123456').encode()
+                ),
+            ],
+            healthcheck_port=5301,
+            redis_url='redis://guest:guest@localhost:6379'
+        )
+
+        agent = openvas_agent.OpenVasAgent(definition, settings)
+        return agent
+
+
+@pytest.fixture(scope='function', name='openvas_agent_no_scope')
+def fixture_agent_no_scope(agent_mock, agent_persist_mock):
+    """OpenVasAgent fixture for testing purposes."""
+    del agent_mock
+    with (pathlib.Path(__file__).parent.parent / 'ostorlab.yaml').open() as yaml_o:
+        definition = agent_definitions.AgentDefinition.from_yaml(yaml_o)
+        settings = runtime_definitions.AgentSettings(
+            key='agent/ostorlab/openvas',
+            bus_url='NA',
+            bus_exchange_topic='NA',
+            args=[
+                utils_definitions.Arg(
+                    name='reporting_engine_base_url',
+                    type='string',
+                    value=json.dumps('https://toto.ostorlab.co/test').encode(),
+                ),
+                utils_definitions.Arg(
+                    name='reporting_engine_token', type='string', value=json.dumps('123456').encode()
                 ),
             ],
             healthcheck_port=5301,
@@ -52,11 +83,46 @@ def scan_message():
 
 @pytest.fixture
 def scan_message_link():
-    """Creates a dummy message of type v3.asset.ip.v4 to be used by the agent for testing purposes."""
+    """Creates a dummy message of type v3.asset.link to be used by the agent for testing purposes."""
+    selector = 'v3.asset.link'
+    msg_data = {
+        'url': 'https://ostorlab.co',
+        'method': 'GET'
+    }
+    return message.Message.from_data(selector, data=msg_data)
+
+
+@pytest.fixture
+def scan_message_link_2():
+    """Creates a dummy message of type v3.asset.link to be used by the agent for testing purposes."""
     selector = 'v3.asset.link'
     msg_data = {
         'url': 'https://test.ostorlab.co',
         'method': 'GET'
+    }
+    return message.Message.from_data(selector, data=msg_data)
+
+
+@pytest.fixture
+def scan_message_service() -> message.Message:
+    """Creates a dummy message of type v3.asset.ip.v4 to be used by the agent for testing purposes.
+    """
+    selector = 'v3.asset.domain_name.service'
+    msg_data = {
+        'name': 'ostorlab.co',
+        'port': 3000,
+        'schema': 'https'
+    }
+    return message.Message.from_data(selector, data=msg_data)
+
+
+@pytest.fixture
+def scan_message_domain_2() -> message.Message:
+    """Creates a dummy message of type v3.asset.ip.v4 to be used by the agent for testing purposes.
+    """
+    selector = 'v3.asset.domain_name.service'
+    msg_data = {
+        'name': 'lab.co'
     }
     return message.Message.from_data(selector, data=msg_data)
 

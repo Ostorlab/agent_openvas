@@ -6,6 +6,8 @@ import subprocess
 import time
 from urllib import parse
 import ipaddress
+from typing import Optional
+import re
 
 from ostorlab.agent import agent
 from ostorlab.agent.message import message as m
@@ -55,10 +57,10 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
     def __init__(self,
                  agent_definition: agent_definitions.AgentDefinition,
                  agent_settings: runtime_definitions.AgentSettings
-                ) -> None:
+                 ) -> None:
         super().__init__(agent_definition, agent_settings)
         persist_mixin.AgentPersistMixin.__init__(self, agent_settings)
-
+        self._scope_regex: Optional[str] = self.args.get('_scope_regex')
 
     def start(self) -> None:
         """Calls the start.sh script to bootstrap the scanner."""
@@ -70,11 +72,34 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
     def process(self, message: m.Message) -> None:
         logger.info('processing message from selector %s', message.selector)
         openvas_wrapper = openvas.OpenVas()
-        target = self._prepare_target(message)
+
+        target = None
+
+        if message.data.get('name') is not None:
+            target = self._prepare_target_url(message)
+            if not self.set_add(STORAGE_NAME, target):
+                logger.info('target %s was processed before, exiting', target)
+                return
+
+        elif message.data.get('url') is not None:
+            target = self._prepare_target_name(message)
+            if not self.set_add(STORAGE_NAME, target):
+                logger.info('target %s was processed before, exiting', target)
+                return
+
+        elif message.data.get('host') is not None:
+            target = self._prepare_target_host(message)
+            addresses = ipaddress.ip_network(target, strict=False)
+            if not self.add_ip_network(STORAGE_NAME, addresses):
+                logger.info('target %s was processed before, exiting', target)
+                return
+
         if target is None:
             return
         else:
             logger.info('scanning target %s', target)
+            if not self._should_process_target(self._scope_regex, target):
+                return
             task_id = openvas_wrapper.start_scan(target)
             openvas_wrapper.wait_task(task_id)
             result = openvas_wrapper.get_results()
@@ -82,53 +107,6 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
                 self._persist_results(result)
                 self._process_results()
             logger.info('Scan finished.')
-
-    def _prepare_target(self, message: m.Message) -> str:
-        """Prepare targets based on type, if a domain name is provided, port and protocol are collected from the config.
-        """
-        if message.data.get('name') is not None:
-            target = self._prepare_domain_target(message)
-            return target
-        elif message.data.get('host'):
-            target = self._prepare_ip_target(message)
-            return target
-        elif message.data.get('url') is not None:
-            target = self._prepare_url_target(message)
-            return target
-
-    def _prepare_domain_target(self, message: m.Message) -> str:
-        """Prepares and checks if a domain asset has been processed before."""
-        target = message.data.get('name')
-        if not self.set_add(STORAGE_NAME, target):
-            logger.info('target %s was processed before, exiting', target)
-            return None
-        else:
-            return target
-
-    def _prepare_url_target(self, message: m.Message) -> str:
-        """Prepares and checks if an URL asset has been processed before."""
-        target = parse.urlparse(message.data.get('url')).netloc
-        if not self.set_add(STORAGE_NAME, target):
-            logger.info('target %s was processed before, exiting', target)
-            return None
-        else:
-            return target
-
-    def _prepare_ip_target(self, message: m.Message) -> str:
-        """Prepares and checks if an IP or a range of IPs assets has been processed before."""
-        host = message.data.get('host')
-        version = ipaddress.ip_address(host).version
-        default_mask = '32' if version == 4 else '164'
-        mask = message.data.get('mask', default_mask)
-        if mask == default_mask:
-            target = host
-        else:
-            target = f'{host}/{mask}'
-        addresses = ipaddress.ip_network(target, strict=False)
-        if not self.add_ip_network(STORAGE_NAME, addresses):
-            logger.info('target %s was processed before, exiting', target)
-        else:
-            return target
 
     def _wait_vt_ready(self):
         """when started, Openvas first loads all the VT to the database
@@ -177,6 +155,33 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
                     ),
                     technical_detail=detail,
                     risk_rating=_severity_map(line_result.get('severity', 'INFO').lower()))
+
+    def _should_process_target(self, scope_regex: Optional[str], url: str) -> bool:
+        if scope_regex is None:
+            return True
+        link_in_scan_domain = re.match(scope_regex, url) is not None
+        if not link_in_scan_domain:
+            logger.warning('link url %s is not in domain %s', url, scope_regex)
+        return link_in_scan_domain
+
+    def _prepare_target_url(self, message: m.Message) -> str:
+        target = message.data.get('name')
+        return target
+
+    def _prepare_target_name(self, message: m.Message) -> str:
+        target = parse.urlparse(message.data.get('url')).netloc
+        return target
+
+    def _prepare_target_host(self, message: m.Message) -> str:
+        host = message.data.get('host')
+        version = ipaddress.ip_address(host).version
+        default_mask = '32' if version == 4 else '164'
+        mask = message.data.get('mask', default_mask)
+        if mask == default_mask:
+            target = host
+        else:
+            target = f'{host}/{mask}'
+        return target
 
 
 if __name__ == '__main__':
