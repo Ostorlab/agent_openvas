@@ -1,6 +1,6 @@
 kind: Agent
 name: openvas
-version: 0.3.4
+version: 0.4.0
 image: images/logo.png
 description: |
   This repository is an implementation of the OpenVas agent.
