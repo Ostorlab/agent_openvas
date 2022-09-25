@@ -5,7 +5,7 @@ from ostorlab.agent.kb import kb
 from ostorlab.agent.mixins import agent_report_vulnerability_mixin
 
 
-def testAgentOpenVas_whenBinaryAvailable_RunScan(openvas_agent, scan_message, mocker):
+def testAgentOpenVas_whenBinaryAvailable_RunScan(openvas_agent_no_scope, scan_message, mocker):
     """Tests running the agent and parsing the json output."""
     star_scan_mocker = mocker.patch('agent.openvas.OpenVas.start_scan', return_value='hduzehfuhehfuhef')
     mocker.patch('agent.openvas.OpenVas.wait_task', return_value=None)
@@ -13,7 +13,7 @@ def testAgentOpenVas_whenBinaryAvailable_RunScan(openvas_agent, scan_message, mo
         mocker.patch('agent.openvas.OpenVas.get_results', return_value=f.read())
         mock_report_vulnerability = mocker.patch('agent.openvas_agent.OpenVasAgent.report_vulnerability',
                                                  return_value=None)
-        openvas_agent.process(scan_message)
+        openvas_agent_no_scope.process(scan_message)
 
         output = {'IP': '128.0.0.1', 'Hostname': 'test', 'Port': '', 'Port Protocol': '', 'CVSS': '',
                   'Severity': 'HIGH', 'Solution Type': '', 'NVT Name': '', 'Summary': '', 'Specific Result': '',
@@ -22,7 +22,7 @@ def testAgentOpenVas_whenBinaryAvailable_RunScan(openvas_agent, scan_message, mo
                   'Affected Software/OS': '', 'Vulnerability Insight': '', 'Vulnerability Detection Method': '',
                   'Product Detection Result': '', 'BIDs': '', 'CERTs': '', 'Other References': ''}
 
-        star_scan_mocker.assert_called_with(scan_message.data.get('host'))
+        star_scan_mocker.assert_called_with(scan_message.data.get('host'), None)
         mock_report_vulnerability.assert_called_with(entry=kb.Entry(title='', risk_rating='INFO',
                                                                     references={}, short_description='',
                                                                     description='', recommendation='',
@@ -179,7 +179,8 @@ def testAgentOpenVas_whenBinaryAvailableAndRangeOfIPsIsInput_RunScan(
 
         assert mock_report_vulnerability.call_args_list[0].kwargs == args1
         assert mock_report_vulnerability.call_args_list[1].kwargs == args2
-        star_scan_mocker.assert_called_with(f'{ip_range_message.data.get("host")}/{ip_range_message.data.get("mask")}')
+        star_scan_mocker.assert_called_with(
+            f'{ip_range_message.data.get("host")}/{ip_range_message.data.get("mask")}', None)
 
 
 def testAgentOpenVas_whenBinaryAvailableAndRangeOfIPsIsInput_NotScan(openvas_agent_no_scope,
@@ -237,4 +238,5 @@ def testAgentOpenVas_whenBinaryAvailableAndRangeOfIPsIsInput_NotScan(openvas_age
 
         assert mock_report_vulnerability.call_args_list[0].kwargs == args1
         assert mock_report_vulnerability.call_args_list[1].kwargs == args2
-        star_scan_mocker.assert_called_with(f'{ip_range_message.data.get("host")}/{ip_range_message.data.get("mask")}')
+        star_scan_mocker.assert_called_with(
+            f'{ip_range_message.data.get("host")}/{ip_range_message.data.get("mask")}', None)
