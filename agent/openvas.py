@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 ALL_IANA_ASSIGNED_TCP_UDP = '4a4717fe-57d2-11e1-9a26-406186ea4fc5'
 GVMD_FULL_FAST_CONFIG = 'daba56c8-73ec-11df-a475-002264764cea'
+GVMD_FULL_DEEP_ULTIMATE_CONFIG = '74db13d6-7489-11df-91b9-002264764cea'
 OPENVAS_SCANNER_ID = '08b69003-5fc2-4037-a479-93b440211c73'
 GMP_USERNAME = 'admin'
 GMP_PASSWORD = 'admin'
@@ -20,11 +21,12 @@ WAIT_TIME = 30
 
 class OpenVas:
     """OpenVas wrapper to enable using openvas scanner from ostorlab agent class."""
-    def start_scan(self, target: str) -> str:
+    def start_scan(self, target: str, scan_config_id: str) -> str:
         """Start OpenVas scan on the ip provided.
 
         Args:
             target: Target ip to scan.
+            scan_config_id: scan configuration used by the task.
         Returns:
             OpenVas task identifier.
         """
@@ -35,7 +37,7 @@ class OpenVas:
             logger.debug('Creating target')
             target_id = self._create_target(gmp, target, ALL_IANA_ASSIGNED_TCP_UDP)
             logger.debug('Creating task for target %s', target_id)
-            task_id = self._create_task(gmp, target, target_id, GVMD_FULL_FAST_CONFIG, OPENVAS_SCANNER_ID, )
+            task_id = self._create_task(gmp, target, target_id, scan_config_id, OPENVAS_SCANNER_ID, )
             logger.debug('Creating report for task %s', task_id)
             report_id = self._start_task(gmp, task_id)
             logger.info('Started scan of host %s. Corresponding report ID is %s', str(target), str(report_id))

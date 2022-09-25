@@ -60,7 +60,7 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
                  ) -> None:
         super().__init__(agent_definition, agent_settings)
         persist_mixin.AgentPersistMixin.__init__(self, agent_settings)
-        self._scope_regex: Optional[str] = self.args.get('_scope_regex')
+        self._scope_regex: Optional[str] = self.args.get('scope_regex')
 
     def start(self) -> None:
         """Calls the start.sh script to bootstrap the scanner."""
@@ -100,7 +100,9 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
             logger.info('scanning target %s', target)
             if not self._should_process_target(self._scope_regex, target):
                 return
-            task_id = openvas_wrapper.start_scan(target)
+            task_id = openvas_wrapper.start_scan(target,
+                                                 self.args.get('scan_config_id', openvas.GVMD_FULL_DEEP_ULTIMATE_CONFIG)
+                                                 )
             openvas_wrapper.wait_task(task_id)
             result = openvas_wrapper.get_results()
             if result is not None:
