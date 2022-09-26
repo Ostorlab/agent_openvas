@@ -38,7 +38,7 @@ class OpenVas:
             target_id = self._create_target(gmp, target, ALL_IANA_ASSIGNED_TCP_UDP)
             logger.debug('Creating task for target %s', target_id)
             logger.info('Config ID is %s', str(scan_config_id))
-            task_id = self._create_task(gmp, target, target_id, GVMD_FULL_DEEP_ULTIMATE_CONFIG, OPENVAS_SCANNER_ID, )
+            task_id = self._create_task(gmp, target, target_id, GVMD_FULL_FAST_CONFIG, OPENVAS_SCANNER_ID, )
             logger.debug('Creating report for task %s', task_id)
             report_id = self._start_task(gmp, task_id)
             logger.info('Started scan of host %s. Corresponding report ID is %s', str(target), str(report_id))

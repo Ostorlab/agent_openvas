@@ -101,7 +101,7 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
             if not self._should_process_target(self._scope_regex, target):
                 return
             task_id = openvas_wrapper.start_scan(target,
-                                                 self.args.get('scan_config_id', openvas.GVMD_FULL_DEEP_ULTIMATE_CONFIG)
+                                                 self.args.get('scan_config_id', openvas.GVMD_FULL_FAST_CONFIG)
                                                  )
             openvas_wrapper.wait_task(task_id)
             result = openvas_wrapper.get_results()
