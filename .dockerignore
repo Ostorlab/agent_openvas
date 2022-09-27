@@ -2,6 +2,5 @@
 Dockerfile
 requirements.txt
 .github
-tests
 .pylintrc
 README.md
