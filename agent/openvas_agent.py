@@ -177,7 +177,7 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
     def _prepare_target_host(self, message: m.Message) -> str:
         host = message.data.get('host')
         version = ipaddress.ip_address(host).version
-        default_mask = '32' if version == 4 else '164'
+        default_mask = '32' if version == 4 else '128'
         mask = message.data.get('mask', default_mask)
         if mask == default_mask:
             target = host
