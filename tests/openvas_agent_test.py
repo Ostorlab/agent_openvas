@@ -15,14 +15,16 @@ def testAgentOpenVas_whenBinaryAvailable_RunScan(openvas_agent_no_scope, scan_me
         mocker.patch('agent.openvas.OpenVas.get_results', return_value=f.read())
         mock_report_vulnerability = mocker.patch('agent.openvas_agent.OpenVasAgent.report_vulnerability',
                                                  return_value=None)
-        output = {'IP': '128.0.0.1', 'Hostname': 'test', 'Port': '', 'Port Protocol': '', 'CVSS': '',
+        output = {'IP': '128.0.0.1', 'Hostname': 'test', 'Port': '80', 'Port Protocol': '', 'CVSS': '',
                   'Severity': 'HIGH', 'Solution Type': '', 'NVT Name': '', 'Summary': '', 'Specific Result': '',
                   'NVT OID': '', 'CVEs': '', 'Task ID': '', 'Task Name': 'PRODUCT_TEST_ONLY',
                   'Timestamp': '2018-03-21T10:19:16+08:00', 'Result ID': '', 'Impact': '', 'Solution': '',
                   'Affected Software/OS': '', 'Vulnerability Insight': '', 'Vulnerability Detection Method': '',
                   'Product Detection Result': '', 'BIDs': '', 'CERTs': '', 'Other References': ''}
         vulnerability_location = vuln_utils.VulnerabilityLocation(
-            metadata=[], asset=ipv4_asset.IPv4(host='128.0.0.1')
+            metadata=[
+                vuln_utils.VulnerabilityLocationMetadata(type=vuln_utils.MetadataType.PORT, value='80')
+            ], asset=ipv4_asset.IPv4(host='128.0.0.1')
         )
 
         openvas_agent_no_scope.process(scan_message)
@@ -51,14 +53,16 @@ def testAgentOpenVas_whenLinkAssetAndBinaryAvailable_RunScan(openvas_agent, scan
         mocker.patch('agent.openvas.OpenVas.get_results', return_value=f.read())
         mock_report_vulnerability = mocker.patch('agent.openvas_agent.OpenVasAgent.report_vulnerability',
                                                  return_value=None)
-        output = {'IP': '128.0.0.1', 'Hostname': 'test', 'Port': '', 'Port Protocol': '', 'CVSS': '',
+        output = {'IP': '128.0.0.1', 'Hostname': 'test', 'Port': '80', 'Port Protocol': '', 'CVSS': '',
                   'Severity': 'HIGH', 'Solution Type': '', 'NVT Name': '', 'Summary': '', 'Specific Result': '',
                   'NVT OID': '', 'CVEs': '', 'Task ID': '', 'Task Name': 'PRODUCT_TEST_ONLY',
                   'Timestamp': '2018-03-21T10:19:16+08:00', 'Result ID': '', 'Impact': '', 'Solution': '',
                   'Affected Software/OS': '', 'Vulnerability Insight': '', 'Vulnerability Detection Method': '',
                   'Product Detection Result': '', 'BIDs': '', 'CERTs': '', 'Other References': ''}
         vulnerability_location = vuln_utils.VulnerabilityLocation(
-            metadata=[], asset=domain_asset.DomainName(name=output['Hostname'])
+            metadata=[
+                vuln_utils.VulnerabilityLocationMetadata(type=vuln_utils.MetadataType.PORT, value='80')
+            ], asset=domain_asset.DomainName(name=output['Hostname'])
         )
 
         openvas_agent.process(scan_message_link)
@@ -98,14 +102,16 @@ def testAgentOpenVas_whenServiceAssetGiven_RunScan(openvas_agent, scan_message_s
         mock_report_vulnerability = mocker.patch('agent.openvas_agent.OpenVasAgent.report_vulnerability',
                                                  return_value=None)
 
-        output = {'IP': '128.0.0.1', 'Hostname': 'test', 'Port': '', 'Port Protocol': '', 'CVSS': '',
+        output = {'IP': '128.0.0.1', 'Hostname': 'test', 'Port': '80', 'Port Protocol': '', 'CVSS': '',
                   'Severity': 'HIGH', 'Solution Type': '', 'NVT Name': '', 'Summary': '', 'Specific Result': '',
                   'NVT OID': '', 'CVEs': '', 'Task ID': '', 'Task Name': 'PRODUCT_TEST_ONLY',
                   'Timestamp': '2018-03-21T10:19:16+08:00', 'Result ID': '', 'Impact': '', 'Solution': '',
                   'Affected Software/OS': '', 'Vulnerability Insight': '', 'Vulnerability Detection Method': '',
                   'Product Detection Result': '', 'BIDs': '', 'CERTs': '', 'Other References': ''}
         vulnerability_location = vuln_utils.VulnerabilityLocation(
-            metadata=[], asset=domain_asset.DomainName(name=output['Hostname'])
+            metadata=[
+                vuln_utils.VulnerabilityLocationMetadata(type=vuln_utils.MetadataType.PORT, value='80')
+            ], asset=domain_asset.DomainName(name=output['Hostname'])
         )
 
         openvas_agent.process(scan_message_service)

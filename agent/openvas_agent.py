@@ -6,7 +6,7 @@ import subprocess
 import time
 from urllib import parse
 import ipaddress
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 import re
 
 from ostorlab.agent import agent
@@ -136,8 +136,8 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
         with open(CSV_PATH_OUTPUT, 'w', encoding='UTF-8') as f:
             f.write(results)
 
-    def _get_vulnerable_target_data(self,
-                                    target: targetables.DomainTarget | targetables.IPTarget,
+    def _prepare_vulnerable_target_data(self,
+                                    target: Union[targetables.DomainTarget, targetables.IPTarget],
                                     vuln: Dict[str, str]
                                     ) -> Optional[agent_report_vulnerability_mixin.VulnerabilityLocation]:
         """Returns the exact target where the vulnerability was detected,
@@ -163,7 +163,7 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
             raise NotImplementedError(f'type target {type(target)} not implemented')
 
 
-    def _process_results(self, target: targetables.DomainTarget | targetables.IPTarget):
+    def _process_results(self, target: Union[targetables.DomainTarget, targetables.IPTarget]):
         """read and parse the output file and send the findings"""
 
         with open(CSV_PATH_OUTPUT, encoding='UTF-8') as csv_file:
@@ -172,7 +172,7 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
                 detail = line_result.get('Specific Result', '')
                 detail += '\n'
                 detail += f'```json\n{json.dumps(line_result, indent=4, sort_keys=True)}\n```'
-                vulnerability_location = self._get_vulnerable_target_data(target, line_result)
+                vulnerability_location = self._prepare_vulnerable_target_data(target, line_result)
                 self.report_vulnerability(
                     entry=kb.Entry(
                         title=line_result.get('NVT Name', 'OpenVas Finding'),
