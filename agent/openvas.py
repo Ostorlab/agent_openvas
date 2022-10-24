@@ -9,6 +9,7 @@ import gvm
 from gvm.protocols import gmp as openvas_gmp
 from gvm import transforms
 
+
 logger = logging.getLogger(__name__)
 
 ALL_IANA_ASSIGNED_TCP_UDP = '4a4717fe-57d2-11e1-9a26-406186ea4fc5'
@@ -21,11 +22,13 @@ WAIT_TIME = 30
 
 class OpenVas:
     """OpenVas wrapper to enable using openvas scanner from ostorlab agent class."""
-    def start_scan(self, target: str, scan_config_id: str) -> str:
+    def start_scan(self,
+                   target: str,
+                   scan_config_id: str) -> str:
         """Start OpenVas scan on the ip provided.
 
         Args:
-            target: Target ip to scan.
+            target: Target IP or Domain to scan.
             scan_config_id: scan configuration used by the task.
         Returns:
             OpenVas task identifier.
