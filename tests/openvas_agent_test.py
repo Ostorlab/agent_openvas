@@ -23,7 +23,7 @@ def testAgentOpenVas_whenBinaryAvailable_RunScan(openvas_agent_no_scope, scan_me
                   'Product Detection Result': '', 'BIDs': '', 'CERTs': '', 'Other References': ''}
         vulnerability_location = vuln_utils.VulnerabilityLocation(
             metadata=[
-                vuln_utils.VulnerabilityLocationMetadata(type=vuln_utils.MetadataType.PORT, value='80')
+                vuln_utils.VulnerabilityLocationMetadata(metadata_type=vuln_utils.MetadataType.PORT, value='80')
             ], asset=ipv4_asset.IPv4(host='128.0.0.1')
         )
 
@@ -61,7 +61,7 @@ def testAgentOpenVas_whenLinkAssetAndBinaryAvailable_RunScan(openvas_agent, scan
                   'Product Detection Result': '', 'BIDs': '', 'CERTs': '', 'Other References': ''}
         vulnerability_location = vuln_utils.VulnerabilityLocation(
             metadata=[
-                vuln_utils.VulnerabilityLocationMetadata(type=vuln_utils.MetadataType.PORT, value='80')
+                vuln_utils.VulnerabilityLocationMetadata(metadata_type=vuln_utils.MetadataType.PORT, value='80')
             ], asset=domain_asset.DomainName(name=output['Hostname'])
         )
 
@@ -110,7 +110,7 @@ def testAgentOpenVas_whenServiceAssetGiven_RunScan(openvas_agent, scan_message_s
                   'Product Detection Result': '', 'BIDs': '', 'CERTs': '', 'Other References': ''}
         vulnerability_location = vuln_utils.VulnerabilityLocation(
             metadata=[
-                vuln_utils.VulnerabilityLocationMetadata(type=vuln_utils.MetadataType.PORT, value='80')
+                vuln_utils.VulnerabilityLocationMetadata(metadata_type=vuln_utils.MetadataType.PORT, value='80')
             ], asset=domain_asset.DomainName(name=output['Hostname'])
         )
 
