@@ -1,29 +1,28 @@
 """Sample agent implementation"""
 import csv
+import ipaddress
 import json
 import logging
+import re
 import subprocess
 import time
-from urllib import parse
-import ipaddress
 from typing import Dict, Optional, Union
-import re
+from urllib import parse
 
 from ostorlab.agent import agent
-from ostorlab.agent.message import message as m
-from ostorlab.agent.kb import kb
-from ostorlab.agent.mixins import agent_report_vulnerability_mixin
-from ostorlab.agent.mixins import agent_persist_mixin as persist_mixin
 from ostorlab.agent import definitions as agent_definitions
-from ostorlab.runtimes import definitions as runtime_definitions
+from ostorlab.agent.kb import kb
+from ostorlab.agent.message import message as m
+from ostorlab.agent.mixins import agent_persist_mixin as persist_mixin
+from ostorlab.agent.mixins import agent_report_vulnerability_mixin
 from ostorlab.assets import domain_name as domain_asset
 from ostorlab.assets import ipv4 as ipv4_asset
 from ostorlab.assets import ipv6 as ipv6_asset
+from ostorlab.runtimes import definitions as runtime_definitions
 from rich import logging as rich_logging
 
 from agent import openvas
 from agent import targetables
-
 
 logging.basicConfig(
     format='%(message)s',
@@ -137,9 +136,9 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
             f.write(results)
 
     def _prepare_vulnerable_target_data(self,
-                                    target: Union[targetables.DomainTarget, targetables.IPTarget],
-                                    vuln: Dict[str, str]
-                                    ) -> Optional[agent_report_vulnerability_mixin.VulnerabilityLocation]:
+                                        target: Union[targetables.DomainTarget, targetables.IPTarget],
+                                        vuln: Dict[str, str]
+                                        ) -> Optional[agent_report_vulnerability_mixin.VulnerabilityLocation]:
         """Returns the exact target where the vulnerability was detected,
         eg: In which IP of the given range the vulnerability was found."""
         metadata = []
@@ -147,21 +146,21 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
             metadata_type = agent_report_vulnerability_mixin.MetadataType.PORT
             metadata_value = vuln.get('Port')
             metadata = [
-                agent_report_vulnerability_mixin.VulnerabilityLocationMetadata(metadata_type=metadata_type, value=metadata_value)
+                agent_report_vulnerability_mixin.VulnerabilityLocationMetadata(metadata_type=metadata_type,
+                                                                               value=metadata_value)
             ]
         if isinstance(target, targetables.DomainTarget) and vuln.get('Hostname', '') != '':
             asset = domain_asset.DomainName(name=vuln.get('Hostname'))
             return agent_report_vulnerability_mixin.VulnerabilityLocation(asset=asset, metadata=metadata)
         elif isinstance(target, targetables.IPTarget) and vuln.get('IP', '') != '':
             vulnerable_host = vuln.get('IP')
-            if target.version==4:
-                asset = ipv4_asset.IPv4(host = vulnerable_host, version = 4, mask = '32')
+            if target.version == 4:
+                asset = ipv4_asset.IPv4(host=vulnerable_host, version=4, mask='32')
             else:
-                asset = ipv6_asset.IPv6(host = vulnerable_host, version = 6, mask = '128')
+                asset = ipv6_asset.IPv6(host=vulnerable_host, version=6, mask='128')
             return agent_report_vulnerability_mixin.VulnerabilityLocation(asset=asset, metadata=metadata)
         else:
             raise NotImplementedError(f'type target {type(target)} not implemented')
-
 
     def _process_results(self, target: Union[targetables.DomainTarget, targetables.IPTarget]):
         """read and parse the output file and send the findings"""
@@ -192,7 +191,6 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
                     technical_detail=detail,
                     risk_rating=_severity_map(line_result.get('severity', 'INFO').lower()),
                     vulnerability_location=vulnerability_location)
-
 
     def _is_url_in_scan_scope(self, url: str, scope_regex: Optional[str] = None) -> bool:
         if scope_regex is None:
