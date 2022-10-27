@@ -147,7 +147,7 @@ class OpenVasAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVuln
             metadata_type = agent_report_vulnerability_mixin.MetadataType.PORT
             metadata_value = vuln.get('Port')
             metadata = [
-                agent_report_vulnerability_mixin.VulnerabilityLocationMetadata(type=metadata_type, value=metadata_value)
+                agent_report_vulnerability_mixin.VulnerabilityLocationMetadata(metadata_type=metadata_type, value=metadata_value)
             ]
         if isinstance(target, targetables.DomainTarget) and vuln.get('Hostname', '') != '':
             asset = domain_asset.DomainName(name=vuln.get('Hostname'))
