@@ -71,6 +71,7 @@ class OpenVasAgent(
         super().__init__(agent_definition, agent_settings)
         persist_mixin.AgentPersistMixin.__init__(self, agent_settings)
         self._scope_regex: Optional[str] = self.args.get("scope_urls_regex")
+        self._scope_domain_regex: Optional[str] = self.args.get("scope_domain_regex")
 
     def start(self) -> None:
         """Calls the start.sh script to bootstrap the scanner."""
@@ -107,8 +108,10 @@ class OpenVasAgent(
             logger.info("Target not provided")
             return
 
-        url_in_scope = self._is_url_in_scan_scope(target.name, self._scope_regex)
-        if isinstance(target, targetables.DomainTarget) and url_in_scope is False:
+        if (
+            isinstance(target, targetables.DomainTarget)
+            and self._is_domain_in_scope(self._scope_domain_regex, target.name) is False
+        ):
             return
 
         logger.info("scanning target %s", target.name)
@@ -220,13 +223,19 @@ class OpenVasAgent(
                     vulnerability_location=vulnerability_location,
                 )
 
-    def _is_url_in_scan_scope(
-        self, url: str, scope_regex: Optional[str] = None
+    def _is_domain_in_scope(
+        self, scope_domain_regex: Optional[str], domain: str
     ) -> bool:
-        if scope_regex is None:
+        """Check if a domain is in the scan scope with a regular expression."""
+        if scope_domain_regex is None:
             return True
-        if re.match(scope_regex, url) is None:
-            logger.warning("link url %s is not in domain %s", url, scope_regex)
+        domain_in_scope = re.match(scope_domain_regex, domain)
+        if domain_in_scope is None:
+            logger.warning(
+                "Domain %s is not in scanning scope %s",
+                domain,
+                scope_domain_regex,
+            )
             return False
         else:
             return True
