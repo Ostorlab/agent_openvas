@@ -70,7 +70,6 @@ class OpenVasAgent(
     ) -> None:
         super().__init__(agent_definition, agent_settings)
         persist_mixin.AgentPersistMixin.__init__(self, agent_settings)
-        self._scope_regex: Optional[str] = self.args.get("scope_urls_regex")
         self._scope_domain_regex: Optional[str] = self.args.get("scope_domain_regex")
 
     def start(self) -> None:
