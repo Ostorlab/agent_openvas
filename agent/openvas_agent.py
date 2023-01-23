@@ -6,8 +6,8 @@ import logging
 import re
 import subprocess
 import time
-from typing import Dict, Optional, Union
 from urllib import parse
+from typing import Dict, Optional, Union
 
 from ostorlab.agent import agent
 from ostorlab.agent import definitions as agent_definitions
@@ -23,6 +23,7 @@ from rich import logging as rich_logging
 
 from agent import openvas
 from agent import targetables
+
 
 logging.basicConfig(
     format="%(message)s",
@@ -69,7 +70,7 @@ class OpenVasAgent(
     ) -> None:
         super().__init__(agent_definition, agent_settings)
         persist_mixin.AgentPersistMixin.__init__(self, agent_settings)
-        self._scope_regex: Optional[str] = self.args.get("scope_regex")
+        self._scope_regex: Optional[str] = self.args.get("scope_urls_regex")
 
     def start(self) -> None:
         """Calls the start.sh script to bootstrap the scanner."""
