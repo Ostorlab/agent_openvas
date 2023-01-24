@@ -193,7 +193,8 @@ def testAgentOpenVas_withDomainScopeArgumentAndDomainNotInScope_targetShouldNotB
     scan_message_domain_2: message.Message,
     mocker: plugin.MockerFixture,
 ):
-    """Ensure the domain scope argument is enforced, and services with domains not in the scope not should be processed."""
+    """Ensure the domain scope argument is enforced.
+    Services with domains not in the scope not should be processed."""
     mocker.patch("agent.openvas.OpenVas.start_scan", return_value="hduzehfuhehfuhef")
     mocker.patch("agent.openvas.OpenVas.wait_task", return_value=None)
     with open("tests/openvas_result.csv", "r", encoding="UTF-8") as f:
