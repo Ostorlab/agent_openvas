@@ -1,5 +1,6 @@
 """Pytest fixture for the openvas agent."""
 import json
+from typing import List, Dict
 
 import pytest
 import pathlib
@@ -63,6 +64,44 @@ def fixture_agent_no_scope(agent_mock, agent_persist_mock):
                     name="reporting_engine_token",
                     type="string",
                     value=json.dumps("123456").encode(),
+                ),
+            ],
+            healthcheck_port=5301,
+            redis_url="redis://guest:guest@localhost:6379",
+        )
+
+        agent = openvas_agent.OpenVasAgent(definition, settings)
+        return agent
+
+
+@pytest.fixture(scope="function", name="openvas_agent_with_scope")
+def fixture_agent_with_scope_arg(
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[str | bytes, str | bytes],
+) -> openvas_agent.OpenVasAgent:
+    """OpenVasAgent fixture for testing purposes."""
+    del agent_mock, agent_persist_mock
+    with (pathlib.Path(__file__).parent.parent / "ostorlab.yaml").open() as yaml_o:
+        definition = agent_definitions.AgentDefinition.from_yaml(yaml_o)
+        settings = runtime_definitions.AgentSettings(
+            key="agent/ostorlab/openvas",
+            bus_url="NA",
+            bus_exchange_topic="NA",
+            args=[
+                utils_definitions.Arg(
+                    name="reporting_engine_base_url",
+                    type="string",
+                    value=json.dumps("https://toto.ostorlab.co/test").encode(),
+                ),
+                utils_definitions.Arg(
+                    name="reporting_engine_token",
+                    type="string",
+                    value=json.dumps("123456").encode(),
+                ),
+                utils_definitions.Arg(
+                    name="scope_domain_regex",
+                    type="string",
+                    value=json.dumps(".*ostorlab.co").encode(),
                 ),
             ],
             healthcheck_port=5301,

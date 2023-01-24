@@ -1,10 +1,14 @@
 """Unittests for OpenVas class."""
 import json
 
+from pytest_mock import plugin
+from ostorlab.agent.message import message
 from ostorlab.agent.kb import kb
 from ostorlab.agent.mixins import agent_report_vulnerability_mixin as vuln_utils
 from ostorlab.assets import ipv4 as ipv4_asset
 from ostorlab.assets import domain_name as domain_asset
+
+from agent import openvas_agent as opv_agent
 
 
 def testAgentOpenVas_whenBinaryAvailable_RunScan(
@@ -163,6 +167,45 @@ def testAgentOpenVas_whenLinkAssetGiven_NotScan(
         _run_command_mock = mocker.patch("subprocess.run", return_value=None)
         openvas_agent.process(scan_message_link_2)
         _run_command_mock.assert_not_called()
+
+
+def testAgentOpenVas_withDomainScopeArgumentAndLinkInScope_shouldReportVulnz(
+    openvas_agent_with_scope: opv_agent.OpenVasAgent,
+    scan_message_link_2: message.Message,
+    mocker: plugin.MockerFixture,
+):
+    """Ensure the domain scope argument is enforced, and urls in the scope should be scanned."""
+    mocker.patch("agent.openvas.OpenVas.start_scan", return_value="hduzehfuhehfuhef")
+    mocker.patch("agent.openvas.OpenVas.wait_task", return_value=None)
+    with open("tests/openvas_result.csv", "r", encoding="UTF-8") as f:
+        mocker.patch("agent.openvas.OpenVas.get_results", return_value=f.read())
+        mock_report_vulnerability = mocker.patch(
+            "agent.openvas_agent.OpenVasAgent.report_vulnerability", return_value=None
+        )
+
+        openvas_agent_with_scope.process(scan_message_link_2)
+
+        assert mock_report_vulnerability.called == 1
+
+
+def testAgentOpenVas_withDomainScopeArgumentAndDomainNotInScope_targetShouldNotBeScanned(
+    openvas_agent_with_scope: opv_agent.OpenVasAgent,
+    scan_message_domain_2: message.Message,
+    mocker: plugin.MockerFixture,
+):
+    """Ensure the domain scope argument is enforced.
+    Services with domains not in the scope not should be processed."""
+    mocker.patch("agent.openvas.OpenVas.start_scan", return_value="hduzehfuhehfuhef")
+    mocker.patch("agent.openvas.OpenVas.wait_task", return_value=None)
+    with open("tests/openvas_result.csv", "r", encoding="UTF-8") as f:
+        mocker.patch("agent.openvas.OpenVas.get_results", return_value=f.read())
+        mock_report_vulnerability = mocker.patch(
+            "agent.openvas_agent.OpenVasAgent.report_vulnerability", return_value=None
+        )
+
+        openvas_agent_with_scope.process(scan_message_domain_2)
+
+        assert mock_report_vulnerability.called == 0
 
 
 def testAgentOpenVas_whenServiceAssetGiven_RunScan(

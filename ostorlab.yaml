@@ -78,9 +78,9 @@ out_selectors:
 docker_file_path : Dockerfile
 docker_build_root : .
 args:
-  - name: "scope_regex"
+  - name: "scope_domain_regex"
     type: "string"
-    description: "to define scanning scope."
+    description: "Regular expression to define domain scanning scope."
   - name: "scan_config_id"
     type: "string"
     description: "OpenVas scan configuration used by the task."
