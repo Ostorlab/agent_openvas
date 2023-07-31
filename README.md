@@ -61,7 +61,7 @@ git clone https://github.com/Ostorlab/agent_openvas.git && cd agent_openvas
  3. Build the agent image using ostorlab cli.
 
  ```shell
- ostortlab agent build --file=ostorlab.yaml
+ ostorlab agent build --file=ostorlab.yaml
  ```
  You can pass the optional flag `--organization` to specify your organisation. The organization is empty by default.
 
