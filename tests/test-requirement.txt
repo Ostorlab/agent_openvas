@@ -1,5 +1,5 @@
-pylint
-pylint-quotes
+ruff
+ruff-quotes
 pytest
 pytest-cov
 pytest-mock
