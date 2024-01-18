@@ -1,5 +1,4 @@
 ruff
-ruff-quotes
 pytest
 pytest-cov
 pytest-mock
