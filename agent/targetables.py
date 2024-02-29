@@ -1,4 +1,5 @@
 """Definitions of targetable assets by the openvas agent."""
+
 import dataclasses
 from typing import Optional
 

@@ -1,4 +1,5 @@
 """Unittests for OpenVas class."""
+
 import json
 
 from pytest_mock import plugin
