@@ -13,4 +13,4 @@ if [ $HTTPS == "true" ]; then
 else
 	su -c "gsad -f --mlisten ovas_gvmd -m 9390 --verbose --timeout=$GSATIMEOUT --http-only --no-redirect --port=9392" gvm
 fi
-tail -f /var/log/gvm/gsad.log
+tail -f /var/log/gvm/gsad.log 

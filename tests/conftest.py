@@ -1,4 +1,5 @@
 """Pytest fixture for the openvas agent."""
+
 import json
 from typing import List, Dict
 

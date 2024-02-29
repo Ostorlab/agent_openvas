@@ -1,4 +1,5 @@
 """Wrapper for OpenVas scanner to start the scan and extract the results."""
+
 import datetime
 import logging
 import base64

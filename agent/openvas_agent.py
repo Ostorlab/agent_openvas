@@ -1,4 +1,5 @@
 """Sample agent implementation"""
+
 import csv
 import ipaddress
 import json
