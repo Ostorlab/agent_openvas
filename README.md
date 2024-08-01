@@ -25,7 +25,7 @@ oxo scan run --install --agent agent/ostorlab/openvas ip 8.8.8.8
 ```
 
 This command will download and install `agent/ostorlab/openvas` and target the ip `8.8.8.8`.
-For more information, please refer to the <a href="https://oxo.ostorlab.co/docs" rel="follow">OXO Documentation</a>
+For more information, please refer to the [OXO Documentation](https://oxo.ostorlab.co/docs)
 
 
 ## Usage
