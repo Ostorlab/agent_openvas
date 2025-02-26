@@ -1,4 +1,4 @@
-"""Unittests for OpenVas class."""
+"""Unit/home/oussama/ostorlab_projects/agent_openvas/tests for OpenVas class."""
 
 import json
 
@@ -138,7 +138,7 @@ def testAgentOpenVas_whenLinkAssetAndBinaryAvailable_RunScan(
 
         mock_report_vulnerability.assert_called_with(
             entry=kb.Entry(
-                title="",
+                title="OpenVas Finding",
                 risk_rating="INFO",
                 references={},
                 short_description="",
@@ -155,7 +155,7 @@ def testAgentOpenVas_whenLinkAssetAndBinaryAvailable_RunScan(
             risk_rating=vuln_utils.RiskRating.INFO,
             technical_detail=f"\n```json\n{json.dumps(output, indent=4, sort_keys=True)}\n```",
             vulnerability_location=vulnerability_location,
-            dna='{"location": {"domain_name": {"name": "test"}, "metadata": [{"type": "PORT", "value": "80"}]}, "title": ""}',
+            dna='{"location": {"domain_name": {"name": "test"}, "metadata": [{"type": "PORT", "value": "80"}]}, "title": "OpenVas Finding"}',
         )
 
 
@@ -200,7 +200,11 @@ def testAgentOpenVas_withDomainScopeArgumentAndDomainNotInScope_targetShouldNotB
     Services with domains not in the scope not should be processed."""
     mocker.patch("agent.openvas.OpenVas.start_scan", return_value="hduzehfuhehfuhef")
     mocker.patch("agent.openvas.OpenVas.wait_task", return_value=None)
-    with open("tests/openvas_result.csv", "r", encoding="UTF-8") as f:
+    with open(
+        "/home/oussama/ostorlab_projects/agent_openvas/tests/openvas_result.csv",
+        "r",
+        encoding="UTF-8",
+    ) as f:
         mocker.patch("agent.openvas.OpenVas.get_results", return_value=f.read())
         mock_report_vulnerability = mocker.patch(
             "agent.openvas_agent.OpenVasAgent.report_vulnerability", return_value=None
@@ -263,7 +267,7 @@ def testAgentOpenVas_whenServiceAssetGiven_RunScan(
 
         mock_report_vulnerability.assert_called_with(
             entry=kb.Entry(
-                title="",
+                title="OpenVas Finding",
                 risk_rating="INFO",
                 references={},
                 short_description="",
@@ -280,7 +284,7 @@ def testAgentOpenVas_whenServiceAssetGiven_RunScan(
             risk_rating=vuln_utils.RiskRating.INFO,
             technical_detail=f"\n```json\n{json.dumps(output, indent=4, sort_keys=True)}\n```",
             vulnerability_location=vulnerability_location,
-            dna='{"location": {"domain_name": {"name": "test"}, "metadata": [{"type": "PORT", "value": "80"}]}, "title": ""}',
+            dna='{"location": {"domain_name": {"name": "test"}, "metadata": [{"type": "PORT", "value": "80"}]}, "title": "OpenVas Finding"}',
         )
 
 
@@ -347,7 +351,7 @@ def testAgentOpenVas_whenBinaryAvailableAndRangeOfIPsIsInput_RunScan(
         )
         args1 = {
             "entry": kb.Entry(
-                title="",
+                title="OpenVas Finding",
                 risk_rating="INFO",
                 references={},
                 short_description="",
@@ -364,7 +368,7 @@ def testAgentOpenVas_whenBinaryAvailableAndRangeOfIPsIsInput_RunScan(
             "risk_rating": vuln_utils.RiskRating.INFO,
             "technical_detail": f"\n```json\n{json.dumps(output1, indent=4, sort_keys=True)}\n```",
             "vulnerability_location": vulnerability_location,
-            "dna": '{"location": {"ipv4": {"host": "128.0.0.1", "mask": "32", "version": 4}, "metadata": [{"type": "PORT", "value": "80"}]}, "title": ""}',
+            "dna": '{"location": {"ipv4": {"host": "128.0.0.1", "mask": "32", "version": 4}, "metadata": [{"type": "PORT", "value": "80"}]}, "title": "OpenVas Finding"}',
         }
 
         output2 = {
@@ -404,7 +408,7 @@ def testAgentOpenVas_whenBinaryAvailableAndRangeOfIPsIsInput_RunScan(
         )
         args2 = {
             "entry": kb.Entry(
-                title="",
+                title="OpenVas Finding",
                 risk_rating="INFO",
                 references={},
                 short_description="",
@@ -421,7 +425,7 @@ def testAgentOpenVas_whenBinaryAvailableAndRangeOfIPsIsInput_RunScan(
             "risk_rating": vuln_utils.RiskRating.INFO,
             "technical_detail": f"\n```json\n{json.dumps(output2, indent=4, sort_keys=True)}\n```",
             "vulnerability_location": vulnerability_location,
-            "dna": '{"location": {"ipv4": {"host": "128.0.0.2", "mask": "32", "version": 4}, "metadata": [{"type": "PORT", "value": "443"}]}, "title": ""}',
+            "dna": '{"location": {"ipv4": {"host": "128.0.0.2", "mask": "32", "version": 4}, "metadata": [{"type": "PORT", "value": "443"}]}, "title": "OpenVas Finding"}',
         }
 
         openvas_agent_no_scope.process(ip_range_message)
