@@ -1,4 +1,4 @@
-"""Unit/home/oussama/ostorlab_projects/agent_openvas/tests for OpenVas class."""
+"""Unittests for OpenVas class."""
 
 import json
 
@@ -200,11 +200,7 @@ def testAgentOpenVas_withDomainScopeArgumentAndDomainNotInScope_targetShouldNotB
     Services with domains not in the scope not should be processed."""
     mocker.patch("agent.openvas.OpenVas.start_scan", return_value="hduzehfuhehfuhef")
     mocker.patch("agent.openvas.OpenVas.wait_task", return_value=None)
-    with open(
-        "/home/oussama/ostorlab_projects/agent_openvas/tests/openvas_result.csv",
-        "r",
-        encoding="UTF-8",
-    ) as f:
+    with open("tests/openvas_result.csv", "r", encoding="UTF-8") as f:
         mocker.patch("agent.openvas.OpenVas.get_results", return_value=f.read())
         mock_report_vulnerability = mocker.patch(
             "agent.openvas_agent.OpenVasAgent.report_vulnerability", return_value=None
