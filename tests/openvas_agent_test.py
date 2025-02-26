@@ -20,7 +20,11 @@ def testAgentOpenVas_whenBinaryAvailable_RunScan(
         "agent.openvas.OpenVas.start_scan", return_value="hduzehfuhehfuhef"
     )
     mocker.patch("agent.openvas.OpenVas.wait_task", return_value=None)
-    with open("tests/openvas_result.csv", "r", encoding="UTF-8") as f:
+    with open(
+        "/home/oussama/ostorlab_projects/agent_openvas/tests/openvas_result.csv",
+        "r",
+        encoding="UTF-8",
+    ) as f:
         mocker.patch("agent.openvas.OpenVas.get_results", return_value=f.read())
         mock_report_vulnerability = mocker.patch(
             "agent.openvas_agent.OpenVasAgent.report_vulnerability", return_value=None
@@ -66,7 +70,7 @@ def testAgentOpenVas_whenBinaryAvailable_RunScan(
         star_scan_mocker.assert_called_with(scan_message.data.get("host"), None)
         mock_report_vulnerability.assert_called_with(
             entry=kb.Entry(
-                title="",
+                title="OpenVas Finding",
                 risk_rating="INFO",
                 references={},
                 short_description="",
@@ -83,7 +87,7 @@ def testAgentOpenVas_whenBinaryAvailable_RunScan(
             risk_rating=vuln_utils.RiskRating.INFO,
             technical_detail=f"\n```json\n{json.dumps(output, indent=4, sort_keys=True)}\n```",
             vulnerability_location=vulnerability_location,
-            dna='{"location": {"ipv4": {"host": "128.0.0.1", "mask": "32", "version": 4}, "metadata": [{"type": "PORT", "value": "80"}]}, "title": ""}',
+            dna='{"location": {"ipv4": {"host": "128.0.0.1", "mask": "32", "version": 4}, "metadata": [{"type": "PORT", "value": "80"}]}, "title": "OpenVas Finding"}',
         )
 
 

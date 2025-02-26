@@ -197,9 +197,12 @@ class OpenVasAgent(
                 vulnerability_location = self._prepare_vulnerable_target_data(
                     target, line_result
                 )
+                title = line_result.get("NVT Name")
+                if title is None or title == "":
+                    title = "OpenVas Finding"
                 self.report_vulnerability(
                     entry=kb.Entry(
-                        title=line_result.get("NVT Name", "OpenVas Finding"),
+                        title=title,
                         risk_rating=_severity_map(
                             line_result.get("severity", "INFO").lower()
                         ).name,
@@ -222,7 +225,7 @@ class OpenVasAgent(
                     ),
                     vulnerability_location=vulnerability_location,
                     dna=_compute_dna(
-                        vuln_title=line_result.get("NVT Name", "OpenVas Finding"),
+                        vuln_title=title,
                         vuln_location=vulnerability_location,
                     ),
                 )
