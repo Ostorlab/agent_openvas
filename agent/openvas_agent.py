@@ -8,7 +8,7 @@ import re
 import subprocess
 import time
 from urllib import parse
-from typing import Dict, Optional, Union
+from typing import Union, Any
 
 from ostorlab.agent import agent
 from ostorlab.agent import definitions as agent_definitions
@@ -71,7 +71,7 @@ class OpenVasAgent(
     ) -> None:
         super().__init__(agent_definition, agent_settings)
         persist_mixin.AgentPersistMixin.__init__(self, agent_settings)
-        self._scope_domain_regex: Optional[str] = self.args.get("scope_domain_regex")
+        self._scope_domain_regex: str | None = self.args.get("scope_domain_regex")
 
     def start(self) -> None:
         """Calls the start.sh script to bootstrap the scanner."""
@@ -148,8 +148,8 @@ class OpenVasAgent(
     def _prepare_vulnerable_target_data(
         self,
         target: Union[targetables.DomainTarget, targetables.IPTarget],
-        vuln: Dict[str, str],
-    ) -> Optional[agent_report_vulnerability_mixin.VulnerabilityLocation]:
+        vuln: dict[str, str],
+    ) -> agent_report_vulnerability_mixin.VulnerabilityLocation | None:
         """Returns the exact target where the vulnerability was detected,
         eg: In which IP of the given range the vulnerability was found."""
         metadata = []
@@ -221,6 +221,10 @@ class OpenVasAgent(
                         line_result.get("severity", "INFO").lower()
                     ),
                     vulnerability_location=vulnerability_location,
+                    dna=_compute_dna(
+                        vuln_title=line_result.get("NVT Name", "OpenVas Finding"),
+                        vuln_location=vulnerability_location,
+                    ),
                 )
 
     def _is_domain_in_scope(self, domain: str) -> bool:
@@ -262,6 +266,46 @@ class OpenVasAgent(
                 name=f"{host}/{mask}", version=version, mask=mask
             )
         return target
+
+
+def _compute_dna(
+    vuln_title: str,
+    vuln_location: agent_report_vulnerability_mixin.VulnerabilityLocation | None,
+) -> str:
+    """Compute a deterministic, debuggable DNA representation for a vulnerability.
+    Args:
+        vuln_title: The title of the vulnerability.
+        vuln_location: The location of the vulnerability.
+    Returns:
+        A deterministic JSON representation of the vulnerability DNA.
+    """
+    dna_data: dict[str, Any] = {"title": vuln_title}
+
+    if vuln_location is not None:
+        location_dict: dict[str, Any] = vuln_location.to_dict()
+        sorted_location_dict = _sort_dict(location_dict)
+        dna_data["location"] = sorted_location_dict
+
+    return json.dumps(dna_data, sort_keys=True)
+
+
+def _sort_dict(dictionary: dict[str, Any] | list[Any]) -> dict[str, Any] | list[Any]:
+    """Recursively sort dictionary keys and lists within.
+    Args:
+        dictionary: The dictionary to sort.
+    Returns:
+        A sorted dictionary or list.
+    """
+    if isinstance(dictionary, dict):
+        return {k: _sort_dict(v) for k, v in sorted(dictionary.items())}
+    if isinstance(dictionary, list):
+        return sorted(
+            dictionary,
+            key=lambda x: json.dumps(x, sort_keys=True)
+            if isinstance(x, dict)
+            else str(x),
+        )
+    return dictionary
 
 
 if __name__ == "__main__":

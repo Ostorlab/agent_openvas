@@ -83,6 +83,7 @@ def testAgentOpenVas_whenBinaryAvailable_RunScan(
             risk_rating=vuln_utils.RiskRating.INFO,
             technical_detail=f"\n```json\n{json.dumps(output, indent=4, sort_keys=True)}\n```",
             vulnerability_location=vulnerability_location,
+            dna='{"location": {"ipv4": {"host": "128.0.0.1", "mask": "32", "version": 4}, "metadata": [{"type": "PORT", "value": "80"}]}, "title": ""}',
         )
 
 
@@ -154,6 +155,7 @@ def testAgentOpenVas_whenLinkAssetAndBinaryAvailable_RunScan(
             risk_rating=vuln_utils.RiskRating.INFO,
             technical_detail=f"\n```json\n{json.dumps(output, indent=4, sort_keys=True)}\n```",
             vulnerability_location=vulnerability_location,
+            dna='{"location": {"domain_name": {"name": "test"}, "metadata": [{"type": "PORT", "value": "80"}]}, "title": ""}',
         )
 
 
@@ -278,6 +280,7 @@ def testAgentOpenVas_whenServiceAssetGiven_RunScan(
             risk_rating=vuln_utils.RiskRating.INFO,
             technical_detail=f"\n```json\n{json.dumps(output, indent=4, sort_keys=True)}\n```",
             vulnerability_location=vulnerability_location,
+            dna='{"location": {"domain_name": {"name": "test"}, "metadata": [{"type": "PORT", "value": "80"}]}, "title": ""}',
         )
 
 
@@ -361,6 +364,7 @@ def testAgentOpenVas_whenBinaryAvailableAndRangeOfIPsIsInput_RunScan(
             "risk_rating": vuln_utils.RiskRating.INFO,
             "technical_detail": f"\n```json\n{json.dumps(output1, indent=4, sort_keys=True)}\n```",
             "vulnerability_location": vulnerability_location,
+            "dna": '{"location": {"ipv4": {"host": "128.0.0.1", "mask": "32", "version": 4}, "metadata": [{"type": "PORT", "value": "80"}]}, "title": ""}',
         }
 
         output2 = {
@@ -417,6 +421,7 @@ def testAgentOpenVas_whenBinaryAvailableAndRangeOfIPsIsInput_RunScan(
             "risk_rating": vuln_utils.RiskRating.INFO,
             "technical_detail": f"\n```json\n{json.dumps(output2, indent=4, sort_keys=True)}\n```",
             "vulnerability_location": vulnerability_location,
+            "dna": '{"location": {"ipv4": {"host": "128.0.0.2", "mask": "32", "version": 4}, "metadata": [{"type": "PORT", "value": "443"}]}, "title": ""}',
         }
 
         openvas_agent_no_scope.process(ip_range_message)
@@ -426,6 +431,6 @@ def testAgentOpenVas_whenBinaryAvailableAndRangeOfIPsIsInput_RunScan(
         assert mock_report_vulnerability.call_args_list[0].kwargs == args1
         assert mock_report_vulnerability.call_args_list[1].kwargs == args2
         star_scan_mocker.assert_called_with(
-            f'{ip_range_message.data.get("host")}/{ip_range_message.data.get("mask")}',
+            f"{ip_range_message.data.get('host')}/{ip_range_message.data.get('mask')}",
             None,
         )
