@@ -58,7 +58,7 @@ def testAgentOpenVas_whenBinaryAvailable_RunScan(
                     metadata_type=vuln_utils.MetadataType.PORT, value="80"
                 )
             ],
-            asset=ipv4_asset.IPv4(host="128.0.0.1"),
+            asset=ipv4_asset.IPv4(host="128.0.0.1", mask="32"),
         )
 
         openvas_agent_no_scope.process(scan_message)
@@ -340,7 +340,7 @@ def testAgentOpenVas_whenBinaryAvailableAndRangeOfIPsIsInput_RunScan(
                     vuln_utils.MetadataType.PORT, "80"
                 )
             ],
-            asset=ipv4_asset.IPv4(host="128.0.0.1", version=4),
+            asset=ipv4_asset.IPv4(host="128.0.0.1", version=4, mask="32"),
         )
         args1 = {
             "entry": kb.Entry(
@@ -396,7 +396,7 @@ def testAgentOpenVas_whenBinaryAvailableAndRangeOfIPsIsInput_RunScan(
                     vuln_utils.MetadataType.PORT, "443"
                 )
             ],
-            asset=ipv4_asset.IPv4(host="128.0.0.2", version=4),
+            asset=ipv4_asset.IPv4(host="128.0.0.2", version=4, mask="32"),
         )
         args2 = {
             "entry": kb.Entry(
@@ -426,6 +426,6 @@ def testAgentOpenVas_whenBinaryAvailableAndRangeOfIPsIsInput_RunScan(
         assert mock_report_vulnerability.call_args_list[0].kwargs == args1
         assert mock_report_vulnerability.call_args_list[1].kwargs == args2
         star_scan_mocker.assert_called_with(
-            f'{ip_range_message.data.get("host")}/{ip_range_message.data.get("mask")}',
+            f"{ip_range_message.data.get('host')}/{ip_range_message.data.get('mask')}",
             None,
         )
