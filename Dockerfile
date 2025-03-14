@@ -1,4 +1,4 @@
-FROM immauss/openvas:22.4.38
+FROM immauss/openvas:22.4.40
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
