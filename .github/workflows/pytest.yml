@@ -41,4 +41,4 @@ jobs:
         python -m uv pip install -r tests/test-requirement.txt
     - name: Runnning tests with pytest.
       run: |
-        pytest -m "not docker" --cov-report=term-missing
+        pytest -m "not docker"
