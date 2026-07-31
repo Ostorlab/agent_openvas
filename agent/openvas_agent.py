@@ -8,7 +8,6 @@ import re
 import subprocess
 import time
 from urllib import parse
-from typing import Dict, Optional, Union
 
 from ostorlab.agent import agent
 from ostorlab.agent import definitions as agent_definitions
@@ -22,9 +21,7 @@ from ostorlab.assets import ipv6 as ipv6_asset
 from ostorlab.runtimes import definitions as runtime_definitions
 from rich import logging as rich_logging
 
-from agent import openvas
-from agent import targetables
-
+from agent import openvas, targetables
 
 logging.basicConfig(
     format="%(message)s",
@@ -71,7 +68,7 @@ class OpenVasAgent(
     ) -> None:
         super().__init__(agent_definition, agent_settings)
         persist_mixin.AgentPersistMixin.__init__(self, agent_settings)
-        self._scope_domain_regex: Optional[str] = self.args.get("scope_domain_regex")
+        self._scope_domain_regex: str | None = self.args.get("scope_domain_regex")
 
     def start(self) -> None:
         """Calls the start.sh script to bootstrap the scanner."""
@@ -131,7 +128,7 @@ class OpenVasAgent(
         """
         while True:
             with open(LOG_FILE, "rb") as f:
-                for line in f.readlines():
+                for line in f:
                     if VT_CHECK in line:
                         return True
             logger.info("Waiting for VT to load in database.")
@@ -147,9 +144,9 @@ class OpenVasAgent(
 
     def _prepare_vulnerable_target_data(
         self,
-        target: Union[targetables.DomainTarget, targetables.IPTarget],
-        vuln: Dict[str, str],
-    ) -> Optional[agent_report_vulnerability_mixin.VulnerabilityLocation]:
+        target: targetables.DomainTarget | targetables.IPTarget,
+        vuln: dict[str, str],
+    ) -> agent_report_vulnerability_mixin.VulnerabilityLocation | None:
         """Returns the exact target where the vulnerability was detected,
         eg: In which IP of the given range the vulnerability was found."""
         metadata = []
@@ -181,9 +178,7 @@ class OpenVasAgent(
         else:
             raise NotImplementedError(f"type target {type(target)} not implemented")
 
-    def _process_results(
-        self, target: Union[targetables.DomainTarget, targetables.IPTarget]
-    ):
+    def _process_results(self, target: targetables.DomainTarget | targetables.IPTarget):
         """read and parse the output file and send the findings"""
 
         with open(CSV_PATH_OUTPUT, encoding="UTF-8") as csv_file:

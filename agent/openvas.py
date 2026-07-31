@@ -1,15 +1,13 @@
 """Wrapper for OpenVas scanner to start the scan and extract the results."""
 
+import base64
 import datetime
 import logging
-import base64
-import socket
 import time
 
 import gvm
-from gvm.protocols import gmp as openvas_gmp
 from gvm import transforms
-
+from gvm.protocols import gmp as openvas_gmp
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +69,9 @@ class OpenVas:
         Returns:
             OpenVas target identifier.
         """
-        name = f"Testing Host {target} {datetime.datetime.now()}"
+        name = (
+            f"Testing Host {target} {datetime.datetime.now(tz=datetime.timezone.utc)}"
+        )
         response = gmp.create_target(
             name=name, hosts=[target], port_list_id=port_list_id
         )
@@ -144,7 +144,7 @@ class OpenVas:
                             )
                             if task.find("status").text == "Done":
                                 return True
-                except socket.timeout:
+                except TimeoutError:
                     logger.error("Socket timeout error")
                 time.sleep(WAIT_TIME)
 
