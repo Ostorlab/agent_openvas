@@ -1,7 +1,6 @@
 """Definitions of targetable assets by the openvas agent."""
 
 import dataclasses
-from typing import Optional
 
 
 @dataclasses.dataclass
@@ -17,6 +16,6 @@ class IPTarget:
 
     name: str
     version: int
-    mask: Optional[str] = None
-    port: Optional[str] = None
-    schema: Optional[str] = None
+    mask: str | None = None
+    port: str | None = None
+    schema: str | None = None

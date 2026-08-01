@@ -1,13 +1,11 @@
 """Pytest fixture for the openvas agent."""
 
 import json
-from typing import List, Dict
-
-import pytest
 import pathlib
 
-from ostorlab.agent.message import message
+import pytest
 from ostorlab.agent import definitions as agent_definitions
+from ostorlab.agent.message import message
 from ostorlab.runtimes import definitions as runtime_definitions
 from ostorlab.utils import definitions as utils_definitions
 
@@ -77,8 +75,8 @@ def fixture_agent_no_scope(agent_mock, agent_persist_mock):
 
 @pytest.fixture(scope="function", name="openvas_agent_with_scope")
 def fixture_agent_with_scope_arg(
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[str | bytes, str | bytes],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
 ) -> openvas_agent.OpenVasAgent:
     """OpenVasAgent fixture for testing purposes."""
     del agent_mock, agent_persist_mock

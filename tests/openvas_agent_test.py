@@ -2,12 +2,12 @@
 
 import json
 
-from pytest_mock import plugin
-from ostorlab.agent.message import message
 from ostorlab.agent.kb import kb
+from ostorlab.agent.message import message
 from ostorlab.agent.mixins import agent_report_vulnerability_mixin as vuln_utils
-from ostorlab.assets import ipv4 as ipv4_asset
 from ostorlab.assets import domain_name as domain_asset
+from ostorlab.assets import ipv4 as ipv4_asset
+from pytest_mock import plugin
 
 from agent import openvas_agent as opv_agent
 
